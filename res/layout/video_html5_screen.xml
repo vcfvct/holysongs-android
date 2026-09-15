@@ -16,6 +16,7 @@
         <LinearLayout android:id="@+id/error_console"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
+                      android:orientation="horizontal"
                 />
 
         <FrameLayout android:id="@+id/main_content"

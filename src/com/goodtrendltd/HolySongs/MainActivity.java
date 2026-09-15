@@ -198,20 +198,20 @@ public class MainActivity extends ListActivity implements AbsListView.OnScrollLi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.about:
-                openAbout();
-                return true;
-            case R.id.settings:
-                openSettings();
-                return true;
-            case R.id.sharing:
-                openSharing();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int itemId = item.getItemId();
+        if (itemId == R.id.about) {
+            openAbout();
+            return true;
         }
+        if (itemId == R.id.settings) {
+            openSettings();
+            return true;
+        }
+        if (itemId == R.id.sharing) {
+            openSharing();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void openSharing() {

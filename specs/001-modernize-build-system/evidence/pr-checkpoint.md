@@ -67,7 +67,26 @@ below is only one part of T017. T027/T034/T039 still require both endpoint gates
 
 ## Clean committed-source host replay
 
-Pending at initial checkpoint commit. Record the exact tested commit, commands, isolated
-Gradle-home setup, artifact hash and observed results in a subsequent evidence-only update.
-No copied local configuration or generated application outputs are permitted. IDE/runtime
-checks remain separate even if host checks pass.
+Initially pending at the source checkpoint commit; the following later record is an
+evidence-only update and does not change application/build/test inputs.
+
+- requirement/scenario ID: C1-CLI-001 [FR-001|US1|CLI|clean-checkout]; C2-APK-001 [FR-006, FR-007|US1|identity-and-signing]
+- date: 2026-09-15; final test timestamps 19:13:53 UTC
+- source revision: `2a498f3a0371e40bc6b1a44c07fe55138eaa06bb`, cloned from the committed branch with `git clone --no-hardlinks --branch build/modernize-build-checkpoint`; clean Git status before and after both builds
+- APK SHA-256: `df6c6d66d395c23e284091e15c2f0dc378e5076a48168ee30ac2fa909a02f174`
+- toolchain: Gradle9.6.0, launcher and daemon Temurin17.0.14+7, AGP9.4.0, platform37, Build Tools36.0.0, Java8 application source/target
+- device/emulator identifier: n/a; Linux host only
+- Android API/version: APK min14/target37; no runtime execution
+- WebView version where applicable: n/a
+- prerequisites: existing installed JDK17 and SDK; README session-local environment exports; an initially empty private GRADLE_USER_HOME; no copied user Gradle settings, local.properties, daemon criteria, build outputs or caches. Wrapper/dependencies downloaded normally. Existing host debug signing material is used by standard Android debug signing; no release key or license acceptance
+- steps: run `./gradlew --version`; run `./gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --no-build-cache --rerun-tasks` twice; inspect test/lint XML, aapt badging, `apksigner verify --verbose --print-certs --min-sdk-version 14`, APK/packaged-song hashes and Git state
+- expected result: pinned runtime, regenerated outputs and passing host checks without user-global Gradle configuration; unchanged identity/data and v1-compatible signature
+- observed result: all commands exit0. Initial build: 37s, 45 tasks executed / 1 up-to-date (initial clean); regeneration replay: 3s, 46 tasks executed. **7 tests, 0 failures/errors/skips** across four classes; **0 lint errors, 25 warnings**, same warning dispositions as review.md. Expected package, version8/2.5, min14/target37 and only the two existing permissions. v1/v2 signatures verify. Packaged songs SHA-256 remains `88eb0db602e018b49a327947dd8607f04e6159e58f39ec38ed59f20c39af9d89`. No local.properties/daemon criteria or generated inputs tracked; checkout remains clean
+- status: passed
+- evidence path: this file; private replay `/tmp/holysongs-pr-clean.yoKfOO/{version.log,build.log,rebuild.log,badging.txt,signing.txt}`; reports in its `repo/app/build/` directory
+- blocker/limitation: host-only pass for this exact commit, not complete T017 or final feature acceptance. The partial tests still lack the T018/T019 coverage described above. No missing-prerequisite negative test, IDE sync/build or dedicated-target install/launch performed here. No claim of a pristine SDK installation or production upgrade. apksigner retains the build-metadata v1 protection warning recorded in earlier evidence
+- maintainer approval reference for accepted provider changes or limitations: none; no provider changes or accepted provider limitations
+
+Subsequent documentation-only commits may record this result but are not themselves represented
+as separately rebuilt revisions. Application/build/test input equivalence must be checked before
+attributing this checkpoint artifact to a later documentation-only PR head.

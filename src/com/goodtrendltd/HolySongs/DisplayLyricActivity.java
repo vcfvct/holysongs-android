@@ -84,20 +84,20 @@ public class DisplayLyricActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.youtube:
-                openSearch(getString(R.string.youtube));
-                return true;
-            case R.id.youku:
-                openSearch(getString(R.string.youku));
-                return true;
-            case R.id.tudou:
-                openSearch(getString(R.string.tudou));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int itemId = item.getItemId();
+        if (itemId == R.id.youtube) {
+            openSearch(getString(R.string.youtube));
+            return true;
         }
+        if (itemId == R.id.youku) {
+            openSearch(getString(R.string.youku));
+            return true;
+        }
+        if (itemId == R.id.tudou) {
+            openSearch(getString(R.string.tudou));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void openSearch(final String target) {

@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+android {
+    namespace 'com.goodtrendltd.HolySongs'
+    compileSdk 37
+    buildToolsVersion '36.0.0'
+
+    defaultConfig {
+        applicationId 'com.goodtrendltd.HolySongs'
+        minSdk 14
+        targetSdk 37
+        versionCode 8
+        versionName '2.5'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile '../AndroidManifest.xml'
+            java.srcDirs = ['../src']
+            res.srcDirs = ['../res']
+            assets.srcDirs = ['../assets']
+        }
+        test {
+            java.srcDirs = ['src/test/java']
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            it.systemProperty 'repositoryRoot', rootProject.projectDir.absolutePath
+        }
+    }
+}
+
+dependencies {
+    implementation files('../libs/pinyin4j-2.5.0.jar')
+    testImplementation 'junit:junit:4.13.2'
+}

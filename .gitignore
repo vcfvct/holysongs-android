@@ -1,0 +1,23 @@
+.pi/
+
+# Android / Java build, local config, and signing secrets
+.gradle/
+**/build/
+**/out/
+**/target/
+**/bin/
+**/gen/
+local.properties
+*.class
+*.iml
+*.log
+.env*
+*.jks
+*.keystore
+keystore.properties
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

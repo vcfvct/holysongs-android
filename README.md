@@ -9,38 +9,25 @@ This repository contains a lightweight, offline-first Android app for browsing a
 
 ## Current status
 
-Historical working-tree checkpoint (before the additional partial US2 tests):
+This is the **build-enablement checkpoint** for a small foundation PR. It adds the Compose compiler/build wiring, a dependency lock replay, and an unused production theme/style probe while keeping the Java launcher, Activities, layouts, catalog, preferences, and tests unchanged. It does **not** migrate any screen to Compose or fix layout overlap yet; the theme probe is not a user-visible UI migration.
 
-- JDK 17 and Gradle 9.6.0 were used successfully
-- `./gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --no-build-cache --rerun-tasks` completed with `BUILD SUCCESSFUL`
-- unit tests: 2 tests, 0 failures, 0 errors, 0 skipped
-- lint: 0 errors, 25 warnings
-- APK hash: `df6c6d66d395c23e284091e15c2f0dc378e5076a48168ee30ac2fa909a02f174`
+The supported install floor is now API 23: API 14–22 devices are no longer eligible to install/update this build. This checkpoint makes no runtime, API 23, or full-feature acceptance claim. Device/IDE execution, provider behavior, release signing, upgrade behavior, and publishing remain outside this PR.
 
-Not executed or blocked and therefore not claimed as passed:
-
-- clean exact-revision checkout from a fresh Git checkout
-- exact-source Android Studio Quail 4 sync/build proof (owner reports build/simulator execution succeeded; artifact, IDE version and tested-flow provenance remain incomplete)
-- dedicated API 14 and API 37 device install/launch validation
-- provider audit and video-path validation
-
-Production signing, release-key generation and publishing are excluded from this feature, not required checks awaiting execution.
-
-This is a draft build-migration checkpoint, not complete feature acceptance. See
-[`pr-checkpoint.md`](specs/001-modernize-build-system/evidence/pr-checkpoint.md) for the latest review and verification record. T018–T020 contain partial preparation only and remain unchecked.
+Historical Feature 001 build evidence remains available in
+[`pr-checkpoint.md`](specs/001-modernize-build-system/evidence/pr-checkpoint.md); it describes the earlier migration checkpoint and is not evidence of this foundation PR's runtime acceptance.
 
 ## Toolchain and compatibility
 
-- AGP: 9.4.0
-- Gradle: 9.6.0
-- JDK: 17
-- Java for the app: 8 source/target compatibility
-- Android SDK: `platforms;android-37` and `build-tools;36.0.0`
-- minimum Android API: 14; compile/target API: 37 (not a maximum-installation restriction)
-- Android Studio: Quail 4 (2026.1.4)
-- Kotlin: the project keeps Java-only builds and the Kotlin opt-out remains visible. The opt-out is already deprecated in AGP 9.4 and scheduled for removal in AGP 10; it is kept visible rather than suppressed.
+- AGP 9.4.0; Gradle 9.6.0; host JDK 17
+- App Java and Kotlin JVM targets: 11
+- AGP built-in Kotlin 2.2.10, matching Compose compiler plugin 2.2.10, and Compose BOM 2026.09.00
+- Android Studio Quail 4 (2026.1.4)
+- Android SDK `platforms;android-37`, `build-tools;36.0.0`; minSdk 23, compile/target 37
+- AndroidX is enabled. Espresso 3.7.0 is pinned to avoid the API 37 InputManager mismatch.
 
-Android Studio itself may run on its bundled JBR runtime; the project still requires a separate local JDK 17 selected as the Studio Gradle JDK. The IDE runtime and the Gradle JDK are distinct settings. Keep machine-specific Java discovery paths in your user-local Gradle configuration, not the project's `gradle.properties`. A locally generated `gradle/gradle-daemon-jvm.properties` can override daemon selection; verify both launcher and daemon JVM information rather than relying on `JAVA_HOME` alone. No daemon-JVM criteria file is included in this checkpoint.
+The launcher remains `com.goodtrendltd.HolySongs.MainActivity`; application identity and version remain `com.goodtrendltd.HolySongs`, versionCode 8 / versionName 2.5. The APK has the two legacy permissions (`INTERNET` and `ACCESS_NETWORK_STATE`) plus the AndroidX-generated app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` protective permission. The added app-private permission has `signature` protection; no new dangerous/runtime permission is introduced.
+
+Android Studio may use its bundled JBR, but Gradle must use a local JDK 17. On Homebrew, `JAVA_HOME` points to the JDK root's `libexec` (for example `$(brew --prefix openjdk@17)/libexec`), not the formula directory itself. Keep discovery paths in the shell/user-local configuration, never in tracked `gradle.properties`; do not copy a daemon-JVM criteria file.
 
 ## Local prerequisites
 
@@ -48,9 +35,8 @@ Android Studio itself may run on its bundled JBR runtime; the project still requ
 - Network access for initial downloads and dependency resolution
 - Local JDK 17 installed under a developer-owned path
 - Android SDK with `platforms;android-37`, `build-tools;36.0.0`, and `platform-tools`
-- Android Studio Quail 4 with the Gradle JDK set to the same local JDK 17
-- Dedicated API 14 and API 37 devices or emulators for runtime validation
-- `adb` available via `platform-tools` on PATH
+- Android Studio with its Gradle JDK set to the same local JDK 17
+- `adb` available via `platform-tools` on PATH (device execution is not claimed here)
 - Human review and acceptance of Android SDK licenses before invoking `sdkmanager` package installs
 
 The official command-line tool setup is documented here:
@@ -65,7 +51,8 @@ If the command-line tools are missing, provisioning is blocked until the develop
 Run from the repository root. Adjust the example JDK/SDK paths below to your installations. Use session-local variables and do not commit a machine-specific `local.properties` or any personal SDK path. A stale `local.properties` overrides `ANDROID_HOME`; use the temporary override below, or intentionally set `sdk.dir` in your ignored local file.
 
 ```bash
-export JAVA_HOME="$HOME/.local/tools/jdk-17"
+# Portable example; on Homebrew use "$(brew --prefix openjdk@17)/libexec".
+export JAVA_HOME="/path/to/jdk-17"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
@@ -104,13 +91,17 @@ This keeps the repository free of global changes and leaves the original file co
 For a checkout with no `local.properties`, or with a correct ignored `sdk.dir`, use these commands directly. If the original stale file remains, use the complete temporary-override block above instead; it runs the same build and restores the original immediately afterward.
 
 ```bash
-export JAVA_HOME="$HOME/.local/tools/jdk-17"
-export ANDROID_HOME="$HOME/Android/Sdk"
-export ANDROID_SDK_ROOT="$ANDROID_HOME"
-export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-
+# Use the same portable environment setup shown above.
 ./gradlew --version
-./gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --no-build-cache --rerun-tasks
+./gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :app:assembleDebugAndroidTest --no-build-cache --rerun-tasks
+```
+
+Replay the app/test build offline without changing the lockfile:
+
+```bash
+sha256sum app/gradle.lockfile
+./gradlew --offline :app:assembleDebug :app:testDebugUnitTest --no-build-cache --rerun-tasks
+sha256sum app/gradle.lockfile  # must match the first hash; do not use --write-locks
 ```
 
 If the local SDK is already installed and complete, this path can still work without a global Gradle install. The project does not require a global installation and does not auto-provision missing Android tool packages.
@@ -122,21 +113,21 @@ APK=app/build/outputs/apk/debug/app-debug.apk
 sha256sum "$APK" assets/songs.xml libs/pinyin4j-2.5.0.jar
 unzip -p "$APK" assets/songs.xml | sha256sum
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK"
-"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs --min-sdk-version 14 "$APK"
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs --min-sdk-version 23 "$APK"
 ```
 
 Check the following:
 
-- package is `com.goodtrendltd.HolySongs`
-- minSdk is `14` and targetSdk is `37`
-- version code/version name remain `8` / `2.5`
-- packaged song asset hash matches the source asset hash in project evidence
+- package is `com.goodtrendltd.HolySongs`; version code/name remain `8` / `2.5`
+- minSdk is `23` and targetSdk is `37`
+- only `INTERNET`, `ACCESS_NETWORK_STATE`, and AndroidX's app-scoped protective dynamic-receiver permission are packaged
+- packaged `assets/songs.xml` hash matches the source asset hash
 - vendored `libs/pinyin4j-2.5.0.jar` stays trackable and unchanged unless separately approved
 - v1 signature compatibility is present, not just v2/v3 signing output
 
-## Install and launch on dedicated devices
+## Install and launch (future runtime validation)
 
-Use explicit device selection with `adb -s <serial>` and do not uninstall an existing production app to get past a signature mismatch.
+No device execution or runtime/full-feature acceptance is claimed by this foundation PR. When runtime work is approved, use explicit device selection with `adb -s <serial>` on API 23 or newer; API 14–22 are below this build's install/update floor. Do not uninstall an existing production app to get past a signature mismatch.
 
 ```bash
 export ANDROID_SERIAL=your-test-device-serial
@@ -146,13 +137,7 @@ adb -s "$ANDROID_SERIAL" install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s "$ANDROID_SERIAL" shell am start -n com.goodtrendltd.HolySongs/.MainActivity
 ```
 
-Required validation caution:
-
-- use dedicated API 14 and API 37 targets only
-- inventory device state before installation
-- do not substitute a different API level
-- stop on signing conflicts rather than uninstalling a production app
-- keep the app offline for first-launch verification when a local catalog run is required
+Inventory device state before installation, stop on signing conflicts, and keep a local catalog run offline when appropriate.
 
 ## Troubleshooting and missing tools
 

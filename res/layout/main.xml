@@ -3,12 +3,13 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
         >
+
     <ListView
-            android:id="@android:id/list"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:cacheColorHint="#00000000"
-            />
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="#00000000" />
+
     <com.goodtrendltd.HolySongs.Sidebar
             android:id="@+id/side_bar"
             android:layout_width="30dip"

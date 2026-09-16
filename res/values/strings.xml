@@ -4,7 +4,12 @@
     <string name="about">关于App</string>
     <string name="settings_text">设置</string>
     <string name="sharing_app_text">分享此app给好友</string>
+    <string name="more_actions">更多操作</string>
     <string name="sharing_lyric_text">分享歌词</string>
+    <string name="catalog_loading">正在加载歌曲…</string>
+    <string name="catalog_error">歌曲加载失败</string>
+    <string name="catalog_retry">重试</string>
+    <string name="catalog_empty">暂无歌曲</string>
     <string name="app_pref">appPrefFile</string>
 
     <string name="font_size_prompt">选择字体大小 当前为: </string>

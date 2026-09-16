@@ -7,7 +7,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Holo.Light"
+            android:theme="@style/HolySongsComposeNoActionBarTheme"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -18,24 +18,25 @@
         <activity
             android:name=".DisplayLyricActivity"
             android:label="歌词"
-            android:theme="@style/MyHoloLightTheme"
+            android:theme="@style/HolySongsComposeNoActionBarTheme"
             android:parentActivityName=".MainActivity"
             android:exported="false"/>
         <activity
             android:name=".AboutActivity"
             android:label="关于"
+            android:theme="@style/HolySongsComposeNoActionBarTheme"
             android:parentActivityName=".MainActivity"
             android:exported="false"/>
         <activity
             android:name=".SettingsActivity"
             android:label="选项设置"
+            android:theme="@style/HolySongsComposeNoActionBarTheme"
             android:parentActivityName=".MainActivity"
             android:exported="false"/>
         <activity
             android:name=".VideoSearch"
             android:label="视频搜索"
             android:hardwareAccelerated="true"
-            android:screenOrientation="portrait"
             android:exported="false"/>
     </application>
 </manifest>

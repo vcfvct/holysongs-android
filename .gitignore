@@ -2,6 +2,7 @@
 
 # Android / Java build, local config, and signing secrets
 .gradle/
+gradle/gradle-daemon-jvm.properties
 **/build/
 **/out/
 **/target/
@@ -9,6 +10,9 @@
 **/gen/
 local.properties
 *.class
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar
+!/libs/pinyin4j-2.5.0.jar
 *.iml
 *.log
 .env*

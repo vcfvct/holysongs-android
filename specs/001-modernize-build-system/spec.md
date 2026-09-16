@@ -4,7 +4,19 @@
 
 **Created**: 2026-09-15
 
-**Status**: Draft
+**Status**: Gradle checkpoint merged (PR #3); original full-feature acceptance incomplete.
+Kotlin/Compose continuation is specified separately in feature 002.
+
+## Successor Scope — 2026-09-15
+
+The owner has requested incremental Kotlin and Jetpack Compose adoption after merging the
+Gradle checkpoint (`f62519b`). See [002-kotlin-compose-ui/spec.md](../002-kotlin-compose-ui/spec.md)
+and its [task transition](../002-kotlin-compose-ui/transition.md) before resuming remaining work.
+This document retains the original build-migration requirements and evidence context; its
+Java-only/no-Compose restrictions are not the scope of the explicitly authorized successor.
+Unfinished verification remains unfinished, and no minimum Android version change is approved
+by this note. Remaining compatibility outcomes move forward under the transition mapping rather
+than requiring every legacy UI fix to be implemented in Java first.
 
 **Input**: User description: "Modernize the HolySongs Android build system. Replace the legacy
 Ant/Eclipse build with a maintained Gradle build and checked-in wrapper, usable from current

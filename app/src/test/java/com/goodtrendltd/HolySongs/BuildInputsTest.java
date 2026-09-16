@@ -17,10 +17,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Planned property name: repositoryRoot.
- * T011 will set this portable property to the repository root before Gradle/JUnit runs.
- * This test intentionally fails clearly if the property is missing so that the build does not
- * silently read the wrong directory.
+ * app/build.gradle supplies the portable repositoryRoot property before Gradle/JUnit runs.
+ * Fail clearly if it is missing rather than silently inspecting the wrong directory.
  */
 public class BuildInputsTest {
     private static final String SONGS_SHA_256 = "88eb0db602e018b49a327947dd8607f04e6159e58f39ec38ed59f20c39af9d89";
@@ -32,7 +30,7 @@ public class BuildInputsTest {
         if (root == null || root.trim().isEmpty()) {
             throw new IllegalStateException(
                     "Missing required system property '" + REPOSITORY_ROOT_PROPERTY
-                            + "'. T011 will provide the repository root before JUnit execution.");
+                            + "'. app/build.gradle must provide it before JUnit execution.");
         }
         return Paths.get(root).toAbsolutePath().normalize();
     }

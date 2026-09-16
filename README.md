@@ -9,12 +9,20 @@ This repository contains a lightweight, offline-first Android app for browsing a
 
 ## Current status
 
-This is the **build-enablement checkpoint** for a small foundation PR. It adds the Compose compiler/build wiring, a dependency lock replay, and an unused production theme/style probe while keeping the Java launcher, Activities, layouts, catalog, preferences, and tests unchanged. It does **not** migrate any screen to Compose or fix layout overlap yet; the theme probe is not a user-visible UI migration.
+The Kotlin/Compose modernization phase is complete and owner-accepted. Main, lyric, Settings,
+and About now use Compose hosts, while the Java WebView/video integration and catalog helpers
+remain intentionally retained boundaries. The migration preserves the application identity,
+bundled catalog, legacy preferences, share payloads, and provider identities.
 
-The supported install floor is now API 23: API 14–22 devices are no longer eligible to install/update this build. This checkpoint makes no runtime, API 23, or full-feature acceptance claim. Device/IDE execution, provider behavior, release signing, upgrade behavior, and publishing remain outside this PR.
+The supported install floor is API 23: API 14–22 devices are no longer eligible to install/update
+this build. On 2026-09-16 the owner reported completing phone testing across the app and accepted
+the result as looking great. The final PR candidate also passes a clean CLI debug build, JVM tests,
+lint, and androidTest APK assembly. API23 runtime execution remains explicitly waived and the
+tracked evidence retains narrower automated-test and provider-audit limitations; phase acceptance
+does not claim release signing or Play Store publication.
 
 Historical Feature 001 build evidence remains available in
-[`pr-checkpoint.md`](specs/001-modernize-build-system/evidence/pr-checkpoint.md); it describes the earlier migration checkpoint and is not evidence of this foundation PR's runtime acceptance.
+[`pr-checkpoint.md`](specs/001-modernize-build-system/evidence/pr-checkpoint.md); it describes the earlier build checkpoint and is not evidence of this Compose migration's runtime acceptance.
 
 ## Toolchain and compatibility
 
@@ -125,9 +133,12 @@ Check the following:
 - vendored `libs/pinyin4j-2.5.0.jar` stays trackable and unchanged unless separately approved
 - v1 signature compatibility is present, not just v2/v3 signing output
 
-## Install and launch (future runtime validation)
+## Install and launch
 
-No device execution or runtime/full-feature acceptance is claimed by this foundation PR. When runtime work is approved, use explicit device selection with `adb -s <serial>` on API 23 or newer; API 14–22 are below this build's install/update floor. Do not uninstall an existing production app to get past a signature mismatch.
+The modernization phase has owner phone acceptance and bounded automated runtime evidence.
+For additional validation, use explicit device selection with `adb -s <serial>` on API 23 or
+newer; API 14–22 are below this build's install/update floor. Do not uninstall an existing
+production app to get past a signature mismatch.
 
 ```bash
 export ANDROID_SERIAL=your-test-device-serial

@@ -70,7 +70,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(files("../libs/pinyin4j-2.5.0.jar"))
+    implementation("com.belerweb:pinyin4j:2.5.0")
 
     implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     androidTestImplementation(platform("androidx.compose:compose-bom:2026.09.00"))

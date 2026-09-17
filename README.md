@@ -118,7 +118,7 @@ If the local SDK is already installed and complete, this path can still work wit
 
 ```bash
 APK=app/build/outputs/apk/debug/app-debug.apk
-sha256sum "$APK" assets/songs.xml libs/pinyin4j-2.5.0.jar
+sha256sum "$APK" assets/songs.xml
 unzip -p "$APK" assets/songs.xml | sha256sum
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK"
 "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs --min-sdk-version 23 "$APK"
@@ -130,7 +130,7 @@ Check the following:
 - minSdk is `23` and targetSdk is `37`
 - only `INTERNET`, `ACCESS_NETWORK_STATE`, and AndroidX's app-scoped protective dynamic-receiver permission are packaged
 - packaged `assets/songs.xml` hash matches the source asset hash
-- vendored `libs/pinyin4j-2.5.0.jar` stays trackable and unchanged unless separately approved
+- Maven Central dependency `com.belerweb:pinyin4j:2.5.0` remains pinned in the dependency lockfile
 - v1 signature compatibility is present, not just v2/v3 signing output
 
 ## Install and launch
@@ -189,6 +189,6 @@ Use the curated project evidence and review records:
 - `specs/001-modernize-build-system/plan.md`
 - `specs/001-modernize-build-system/quickstart.md`
 
-The vendored `libs/pinyin4j-2.5.0.jar` remains a retained dependency and its upstream license provenance is part of the project risk record rather than a claim of legal clearance.
+Pinyin processing uses the pinned Maven Central dependency `com.belerweb:pinyin4j:2.5.0`. Historical records under `specs/001-modernize-build-system/` document the formerly vendored JAR and remain unchanged as evidence of that earlier baseline.
 
 Third-party video provider behavior remains an audit topic rather than a passed validation result.

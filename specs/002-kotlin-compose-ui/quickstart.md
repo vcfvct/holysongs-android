@@ -74,7 +74,7 @@ Do not suppress broad lint categories to create a pass. Build reports remain und
 
 ```bash
 APK=app/build/outputs/apk/debug/app-debug.apk
-sha256sum "$APK" assets/songs.xml libs/pinyin4j-2.5.0.jar
+sha256sum "$APK" assets/songs.xml
 unzip -p "$APK" assets/songs.xml | sha256sum
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK"
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions "$APK"

@@ -13,7 +13,6 @@ local.properties
 *.jar
 *.aab
 !/gradle/wrapper/gradle-wrapper.jar
-!/libs/pinyin4j-2.5.0.jar
 *.iml
 *.log
 .env*

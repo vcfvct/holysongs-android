@@ -11,15 +11,17 @@ import android.text.util.Linkify
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.ExperimentalMaterial3Api
 
 /** About content remains byte-for-byte equivalent to the legacy screen, including links. */
 const val ABOUT_CONTENT: String = "\n我们是位于马里兰州Germantown的德国镇基督教会，欢迎大家光临。http://www.cccgermantown.org/ " +
@@ -70,6 +72,7 @@ internal fun configureAboutText(view: TextView) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen() {
+    val colorScheme = MaterialTheme.colorScheme
     Scaffold(
         topBar = { TopAppBar(title = { Text("关于App") }) },
     ) { insets ->
@@ -82,10 +85,14 @@ fun AboutScreen() {
             factory = { context ->
                 TextView(context).apply {
                     setLineSpacing(10f, 1f)
+                    setTextColor(colorScheme.onSurface.toArgb())
+                    setLinkTextColor(colorScheme.primary.toArgb())
                     configureAboutText(this)
                 }
             },
             update = { view ->
+                view.setTextColor(colorScheme.onSurface.toArgb())
+                view.setLinkTextColor(colorScheme.primary.toArgb())
                 configureAboutText(view)
             },
         )

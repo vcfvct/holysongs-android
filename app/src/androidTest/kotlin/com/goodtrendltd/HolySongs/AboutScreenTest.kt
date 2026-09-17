@@ -1,23 +1,32 @@
 package com.goodtrendltd.HolySongs
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.text.Spanned
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import android.content.ActivityNotFoundException
 import com.goodtrendltd.HolySongs.ui.ABOUT_CONTENT
 import com.goodtrendltd.HolySongs.ui.AboutLinkActivation
+import com.goodtrendltd.HolySongs.ui.HolySongsTheme
 import com.goodtrendltd.HolySongs.ui.SafeAboutLinkSpan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import android.text.Spanned
-import android.text.style.URLSpan
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AboutScreenTest {
+    @get:Rule
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
+
     @Test
     fun aboutContentKeepsTheLegacyTextAndBothExplicitLinkDestinations() {
         val context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
@@ -29,6 +38,29 @@ class AboutScreenTest {
                 val links = spanned.getSpans(0, spanned.length, SafeAboutLinkSpan::class.java)
                 assertTrue(links.any { it.destination == "http://www.cccgermantown.org" })
                 assertTrue(links.any { it.destination == "mailto:vcfvct@gmail.com" })
+            }
+        }
+    }
+
+    @Test
+    fun aboutScreenUsesMaterialThemeColorsInDarkAndLightModes() {
+        composeRule.setContent {
+            HolySongsTheme(nightMode = false) {
+                com.goodtrendltd.HolySongs.ui.AboutScreen()
+            }
+        }
+        composeRule.runOnIdle {
+            val textView = findTextView(composeRule.activity.findViewById(android.R.id.content))
+            assertEquals(lightColorScheme().onSurface.toArgb(), textView.currentTextColor)
+            assertEquals(lightColorScheme().primary.toArgb(), textView.linkTextColors.defaultColor)
+        }
+
+        val context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
+        ActivityScenario.launch<AboutActivity>(Intent(context, AboutActivity::class.java)).use { scenario ->
+            scenario.onActivity { activity ->
+                val textView = findTextView(activity.window.decorView)
+                assertEquals(darkColorScheme().onSurface.toArgb(), textView.currentTextColor)
+                assertEquals(darkColorScheme().primary.toArgb(), textView.linkTextColors.defaultColor)
             }
         }
     }

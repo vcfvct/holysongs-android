@@ -42,7 +42,10 @@ theme restart. Guard custom Back handling only where needed so normal system Bac
 | Target String | Baseline prefix |
 |---|---|
 | `youtube` | `http://m.youtube.com/results?q=` |
-| `bilibili` | `https://search.bilibili.com/all?keyword=` |
+| `douyin` | `https://so.douyin.com/s?keyword=` |
+
+The owner approved replacing Bilibili with Douyin on 2026-09-17 in
+[GitHub issue #13](https://github.com/vcfvct/holysongs-android/issues/13).
 
 - **N3-QUERY**: Validate exact target and nonempty title. URL construction preserves search intent
   and encodes the Chinese query using UTF-8. Audit baseline/redirect/final URL, status and actual

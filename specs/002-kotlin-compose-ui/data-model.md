@@ -163,7 +163,7 @@ commands and must never replay after recomposition or recreation.
 |---|---|
 | Main → DisplayLyric | String `com.goodtrendltd.SONG_NAME`, String `com.goodtrendltd.LYRIC` |
 | DisplayLyric → VideoSearch | String `com.goodtrendltd.searchTarget`, String `com.goodtrendltd.SONG_NAME` |
-| Search target | `youtube` or `bilibili` |
+| Search target | `youtube` or `douyin` |
 | Lyric share | ACTION_SEND, text/plain, EXTRA_SUBJECT title, EXTRA_TEXT effective lyric |
 | App share | Existing subject/text/link payload from MainActivity; preserve whitespace/newlines |
 

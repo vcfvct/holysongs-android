@@ -70,7 +70,7 @@ class VideoSearchTest {
         val title = "一首中文歌"
         val providers = listOf(
             context.getString(R.string.youtube) to context.getString(R.string.youtube_url),
-            context.getString(R.string.bilibili) to context.getString(R.string.bilibili_url)
+            context.getString(R.string.douyin) to context.getString(R.string.douyin_url)
         )
         providers.forEach { (target, prefix) ->
             val intent = Intent(context, VideoSearch::class.java)
@@ -80,18 +80,20 @@ class VideoSearchTest {
             assertEquals(title, intent.getStringExtra(MainActivity.SONG_NAME))
             assertEquals(prefix, when (target) {
                 context.getString(R.string.youtube) -> context.getString(R.string.youtube_url)
-                else -> context.getString(R.string.bilibili_url)
+                else -> context.getString(R.string.douyin_url)
             })
             assertEquals(prefix + Uri.encode(title), VideoSearch.searchUrlFor(context, target, title))
         }
         assertTrue(VideoSearch.isSupportedTarget(context, context.getString(R.string.youtube)))
-        assertTrue(VideoSearch.isSupportedTarget(context, context.getString(R.string.bilibili)))
+        assertTrue(VideoSearch.isSupportedTarget(context, context.getString(R.string.douyin)))
+        assertFalse(VideoSearch.isSupportedTarget(context, "bilibili"))
         assertFalse(VideoSearch.isSupportedTarget(context, "youku"))
         assertFalse(VideoSearch.isSupportedTarget(context, "tudou"))
         assertEquals("youtube", context.getString(R.string.youtube))
-        assertEquals("bilibili", context.getString(R.string.bilibili))
+        assertEquals("douyin", context.getString(R.string.douyin))
         assertEquals("http://m.youtube.com/results?q=", context.getString(R.string.youtube_url))
-        assertEquals("https://search.bilibili.com/all?keyword=", context.getString(R.string.bilibili_url))
+        assertEquals("https://so.douyin.com/s?keyword=", context.getString(R.string.douyin_url))
+        assertNull(VideoSearch.searchUrlFor(context, "bilibili", title))
         assertNull(VideoSearch.searchUrlFor(context, "youku", title))
         assertNull(VideoSearch.searchUrlFor(context, "tudou", title))
 
@@ -109,7 +111,7 @@ class VideoSearchTest {
         val expectedQuery = Uri.encode(title)
         val providers = listOf(
             context.getString(R.string.youtube) to context.getString(R.string.youtube_url),
-            context.getString(R.string.bilibili) to context.getString(R.string.bilibili_url),
+            context.getString(R.string.douyin) to context.getString(R.string.douyin_url),
         )
         providers.forEach { (target, prefix) ->
             assertEquals(prefix + expectedQuery, VideoSearch.searchUrlFor(context, target, title))

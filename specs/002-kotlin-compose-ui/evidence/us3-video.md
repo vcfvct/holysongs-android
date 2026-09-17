@@ -6,6 +6,12 @@
 > The current source-level UTF-8 contract is `VideoSearch.searchUrlFor` applying `Uri.encode`
 > to the title query while preserving each provider prefix; current runtime verification remains
 > unexecuted.
+>
+> **Provider change after this historical record:** On 2026-09-17 the owner approved replacing
+> Bilibili with Douyin in [GitHub issue #13](https://github.com/vcfvct/holysongs-android/issues/13).
+> The accepted prefix is `https://so.douyin.com/s?keyword=` and the target is `douyin`. The
+> replacement compiles and its URL/encoding assertions compile, but no connected device was
+> available for live Douyin WebView or playback verification; no provider-success claim is made.
 
 ## Scope and attribution
 

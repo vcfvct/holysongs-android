@@ -157,7 +157,7 @@ class VideoSearch : Activity() {
         @JvmStatic
         fun isSupportedTarget(context: Context, value: String?): Boolean {
             return context.getString(R.string.youtube) == value ||
-                context.getString(R.string.bilibili) == value
+                context.getString(R.string.douyin) == value
         }
 
         @JvmStatic
@@ -178,7 +178,7 @@ class VideoSearch : Activity() {
             val encodedTitle = Uri.encode(title)
             return when (target) {
                 context.getString(R.string.youtube) -> context.getString(R.string.youtube_url) + encodedTitle
-                context.getString(R.string.bilibili) -> context.getString(R.string.bilibili_url) + encodedTitle
+                context.getString(R.string.douyin) -> context.getString(R.string.douyin_url) + encodedTitle
                 else -> null
             }
         }

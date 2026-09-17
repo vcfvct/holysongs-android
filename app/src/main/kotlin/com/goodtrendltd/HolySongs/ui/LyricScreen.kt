@@ -64,7 +64,7 @@ fun LyricScreen(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     ProviderButton(R.string.youtube_menu, "youtube") { providerMenu = false; onVideo(it) }
-                    ProviderButton(R.string.bilibili_menu, "bilibili") { providerMenu = false; onVideo(it) }
+                    ProviderButton(R.string.douyin_menu, "douyin") { providerMenu = false; onVideo(it) }
                 }
             }
             LazyColumn(

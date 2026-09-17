@@ -306,6 +306,12 @@ public class HTML5WebView extends WebView {
 
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
+            // Signal the active load as fully settled at the WebChromeClient completion point,
+            // which may arrive before the URL-equality callback on YouTube or other pages that
+            // finish rendering without a distinct final main-frame callback.
+            if (newProgress >= 100 && loading) {
+                settleLoading();
+            }
             if (isLiveForUi()) {
                 ((Activity) mContext).getWindow().setFeatureInt(Window.FEATURE_PROGRESS, newProgress * 100);
             }

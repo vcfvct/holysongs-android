@@ -137,6 +137,24 @@ class VideoSearchTest {
     }
 
     @Test
+    fun webChromeProgressCompletionSettlesActiveLoad() {
+        lateinit var webView: HTML5WebView
+        instrumentation.runOnMainSync {
+            webView = HTML5WebView(context.applicationContext)
+            val client = webView.getWebViewClientForTest()
+            val chrome = webView.getWebChromeClientForTest()
+            client.onPageStarted(webView, "https://fixture.invalid/loading", null)
+            assertTrue(webView.isLoading)
+            chrome.onProgressChanged(webView, 99)
+            assertTrue(webView.isLoading)
+            chrome.onProgressChanged(webView, 100)
+            assertFalse(webView.isLoading)
+            webView.release()
+        }
+        assertTrue(webView.isReleased)
+    }
+
+    @Test
     fun mainFrameFailureSettlesLoadingAndGeolocationIsDenied() {
         lateinit var webView: HTML5WebView
         lateinit var client: android.webkit.WebViewClient

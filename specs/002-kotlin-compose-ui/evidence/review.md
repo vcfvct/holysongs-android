@@ -16,11 +16,18 @@ were added, verified with repository-wide `R.layout`/`@layout` searches, and wer
   lyric actions are Compose callbacks.
 - `res/layout/list_position.xml` — no remaining layout reference.
 
-`res/layout/song_item.xml`, `src/com/goodtrendltd/HolySongs/SongTitleAdapter.java`, and
-`src/com/goodtrendltd/HolySongs/Sidebar.java` remain because source references or the formal
-post-story cleanup gate still require them. `res/layout/main.xml` was not edited or removed; the
-owner's modified history is preserved. Required assets, strings, Holo styles, Java WebView/video
-helpers and manifest identity remain.
+At this partial-review checkpoint, `res/layout/song_item.xml`,
+`src/com/goodtrendltd/HolySongs/SongTitleAdapter.java`,
+`src/com/goodtrendltd/HolySongs/Sidebar.java`, and `res/layout/main.xml` still remained. This is
+historical checkpoint evidence, not the final repository inventory.
+
+A later owner-authorized cleanup on 2026-09-17 rechecked repository-wide references, replaced the
+active WebView/video and catalog helper Java with same-identity Kotlin implementations, converted
+project-owned Java tests to Kotlin, and removed the superseded list/video layout and menu XML.
+The final source inventory has no project-owned `.java`, `res/layout`, or `res/menu` files. The root
+manifest, song catalog XML, string/style/id resources, bundled pinyin JAR, app identity, providers,
+and preference/data contracts remain. Build/lint/test/APK assembly passed after that cleanup;
+device/provider limitations below remain unchanged and are not promoted to passes.
 
 ## Verification
 
@@ -65,3 +72,28 @@ ReaderPreferences (4), and the applicable SongList default/fit/preference cases 
 and resize opt-ins remained blocked because this emulator measured the fit geometry. Raw logs are
 outside tracked source under `/tmp/holysongs-api37-final`; the emulator was stopped after testing.
 This focused result does not substitute for the remaining manual/provider/final-artifact gates.
+
+## Kotlin-only cleanup verification — 2026-09-17
+
+The owner-authorized cleanup converted the retained WebView/video boundary, catalog helpers, and
+project-owned Java tests to Kotlin, replaced the two video layout resources with programmatic Views,
+and removed the superseded list/video layouts and menu. Repository inspection found no project-owned
+`.java`, `res/layout`, or `res/menu` files. AndroidManifest.xml, values resources, `assets/songs.xml`,
+and the bundled pinyin JAR remain because they are active platform/resource/data dependencies rather
+than legacy screen implementations. Application bytecode remains at the owner-approved JVM11 target
+recorded in `execution-decisions.md`; JDK17 remains the build toolchain and minSdk remains23.
+
+A clean local gate passed:
+`clean testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest`. The exact generated APKs
+were then exercised on the approved wiped API37 `Pixel_10_Pro_XL` emulator (fingerprint
+`google/sdk_gphone16k_x86_64/emu64xa16k:17/CP31.260623.012/16064790:user/dev-keys`). The connected
+suite completed successfully at the Gradle task level: 27 tests executed without failure, including
+all 9 `VideoSearchTest` cases; 9 opt-in cases reported JUnit assumption violations because their
+runner flags were not supplied (4 preference-mutation and 5 sidebar mode/resize cases). APK SHA-256:
+`b57ea868ec30c07351a21f700b1cea65226ae3acd1807d8268bc6d26d718c105`; test APK SHA-256:
+`13369871e74530ee541e384dc6827b72e3d431720e60962c5c3b0148f5bab892`.
+
+This run verifies the Kotlin replacement on API37 but does not claim API23 execution, real-provider
+reachability, or a platform-impossible identity guarantee for delayed same-URL WebView callbacks.
+The callback limitation and live-provider reachability remain explicitly recorded rather than
+being hidden by the successful automated runs.

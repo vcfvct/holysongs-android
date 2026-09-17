@@ -17,10 +17,9 @@ new entry is AndroidX Core's app-private signature protection, not a new runtime
 | N1-VIDEO | DisplayLyric → VideoSearch | String `com.goodtrendltd.searchTarget` and `com.goodtrendltd.SONG_NAME` |
 | N1-INVALID | Any retained boundary | Missing/wrong-type/invalid argument yields safe error/back; no crash or arbitrary fallback song |
 
-Keep constants Java-callable when their declaring Activities move to Kotlin. The pilot must work
-with legacy Java DisplayLyricActivity reading MainActivity constants. The later reader must work
-with retained Java VideoSearch reading DisplayLyricActivity.SEARCH_TARGET. This compile-time and
-runtime interop is required, not just an internal renaming convenience.
+Keep constants Java-callable when their declaring Activities move to Kotlin. The completed reader
+and Kotlin `VideoSearch` must preserve the existing `DisplayLyricActivity.SEARCH_TARGET` boundary.
+Component identity and runtime extras compatibility are required, not just internal naming parity.
 
 Navigation is user-event-driven, never a composable-body side effect. Do not save/replay pending
 navigation commands. Back normally pops the Activity stack; no new navigation graph or stack-clearing

@@ -2,4 +2,8 @@
 <resources>
     <!-- Retained for the Compose Settings AndroidView interoperability boundary. -->
     <item name="nightModeSwitch" type="id" />
+    <item name="main_content" type="id" />
+    <item name="fullscreen_custom_content" type="id" />
+    <item name="error_console" type="id" />
+    <item name="progress_indicator" type="id" />
 </resources>

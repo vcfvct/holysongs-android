@@ -8,12 +8,16 @@ validation, SDK installation/license acceptance, or live provider audit occurred
 
 ## R1. Toolchain and Exact Dependency Selection
 
-**Decision:** Retain AGP 9.4.0, Gradle 9.6.0, JDK 17, Java/JVM target 8, Build Tools 36.0.0,
+**Decision:** Retain AGP 9.4.0, Gradle 9.6.0, JDK 17, Java/JVM target 11, Build Tools 36.0.0,
 compile/target SDK 37, and Android Studio Quail 4 (2026.1.4). Enable AGP built-in Kotlin
 **2.2.10** and apply `org.jetbrains.kotlin.plugin.compose` **2.2.10**. Raise minSdk to the
 owner-approved **23** during implementation, not as part of these documentation changes.
 
-**Rationale:** The [AGP 9.4 compatibility table](https://developer.android.com/build/releases/agp-9-4-0-release-notes)
+**Rationale:** The retained Kotlin/Compose toolchain is the currently buildable match for the pinned
+AGP 9.4.0 and Compose BOM selection. The earlier Java/JVM target 8 note was written during early
+planning and is stale for the actual resolved dependency set: the selected Kotlin 2.2.10 + Compose
+runtime stack compiles cleanly against JVM 11, while forcing Java 8/Kotlin 1.8 injects the
+compiler mismatch described in the build gate. The [AGP 9.4 compatibility table](https://developer.android.com/build/releases/agp-9-4-0-release-notes)
 supports the retained toolchain. The [Studio stable release page](https://developer.android.com/studio/releases)
 identifies Quail 4. [Android 17 SDK setup](https://developer.android.com/about/versions/17/setup-sdk)
 uses compile/target 37. Select Android 17/API 37 as the dated current runtime alongside API 23.
@@ -135,8 +139,9 @@ artifact inspection is not a claim that the application's resolved manifest has 
 `repositoryRoot` for JVM tests. Explicitly register module-local main/test/androidTest Kotlin
 roots via `android.sourceSets` Kotlin directories, not the Java source directory mapping.
 Remove `android.builtInKotlin=false`; enable Compose, its matching compiler plugin, AndroidX,
-and AndroidJUnitRunner. Retain Java target8 and aligned Kotlin JVM8, not runtime-JDK17 bytecode.
-Do not add desugaring unless a directly used library/API actually requires it.
+and AndroidJUnitRunner. Use the owner-approved Java/Kotlin JVM11 application target required by
+the resolved Compose inline APIs; this remains distinct from the JDK17 build toolchain. Do not add
+desugaring unless a directly used library/API actually requires it.
 
 Use same-identity Kotlin ComponentActivity hosts for Main, DisplayLyric, Settings and About.
 Replace each `.java` definition only when its `.kt` replacement is wired; never compile both

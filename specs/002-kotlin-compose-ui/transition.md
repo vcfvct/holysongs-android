@@ -65,8 +65,8 @@ into passes.
    Missing required evidence blocks acceptance; it is not waived by this scope transition.
 
 This document remains the specification handoff and does not rewrite feature 001's historical
-results. Feature 002 replaced the core reader screens with Kotlin/Compose and hardened the retained
-Java video boundary; see [tasks.md](tasks.md) and the feature evidence directory for attributable
+results. Feature 002 replaced the core reader screens with Kotlin/Compose and hardened the video
+boundary, which subsequently moved from Java to same-identity Kotlin; see [tasks.md](tasks.md) and the feature evidence directory for attributable
 results. On 2026-09-16 the owner reported testing the complete app on a phone, accepted the result,
 and closed the phase. This product acceptance does not retroactively turn narrower automated,
 provider, API23, IDE, process-death, compact-window, or WebView callback evidence into passes, and

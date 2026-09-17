@@ -36,26 +36,6 @@ android {
         compose = true
     }
 
-    sourceSets {
-        getByName("main") {
-            manifest.srcFile("../AndroidManifest.xml")
-            kotlin.directories.clear()
-            kotlin.directories.add("src/main/kotlin")
-            res.directories.clear()
-            res.directories.add("../res")
-            assets.directories.clear()
-            assets.directories.add("../assets")
-        }
-        getByName("test") {
-            kotlin.directories.clear()
-            kotlin.directories.add("src/test/kotlin")
-        }
-        getByName("androidTest") {
-            kotlin.directories.clear()
-            kotlin.directories.add("src/androidTest/kotlin")
-        }
-    }
-
     testOptions {
         unitTests.all {
             it.systemProperty("repositoryRoot", rootProject.projectDir.absolutePath)

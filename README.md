@@ -5,7 +5,7 @@ My Chinese hymns Android app. Check it out in Google play store :)
 
 ## Project background
 
-This repository contains a lightweight, offline-first Android app for browsing and reading Chinese hymn lyrics. The modernization work keeps the original Java app structure, bundled song catalog, application identity, and preference semantics while replacing the legacy Ant/Eclipse build with a maintained Gradle-based workflow.
+This repository contains a lightweight, offline-first Android app for browsing and reading Chinese hymn lyrics. The modernization work keeps the bundled song catalog, application identity, and preference semantics while replacing the legacy Ant/Eclipse build with a maintained Gradle-based workflow. The app module now uses the standard Android layout under `app/src/main/` for its manifest, Kotlin sources, resources, and assets.
 
 ## Current status
 
@@ -118,7 +118,7 @@ If the local SDK is already installed and complete, this path can still work wit
 
 ```bash
 APK=app/build/outputs/apk/debug/app-debug.apk
-sha256sum "$APK" assets/songs.xml
+sha256sum "$APK" app/src/main/assets/songs.xml
 unzip -p "$APK" assets/songs.xml | sha256sum
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK"
 "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs --min-sdk-version 23 "$APK"
@@ -129,7 +129,7 @@ Check the following:
 - package is `com.goodtrendltd.HolySongs`; version code/name remain `8` / `2.5`
 - minSdk is `23` and targetSdk is `37`
 - only `INTERNET`, `ACCESS_NETWORK_STATE`, and AndroidX's app-scoped protective dynamic-receiver permission are packaged
-- packaged `assets/songs.xml` hash matches the source asset hash
+- packaged `assets/songs.xml` hash matches the source `app/src/main/assets/songs.xml` hash
 - Maven Central dependency `com.belerweb:pinyin4j:2.5.0` remains pinned in the dependency lockfile
 - v1 signature compatibility is present, not just v2/v3 signing output
 

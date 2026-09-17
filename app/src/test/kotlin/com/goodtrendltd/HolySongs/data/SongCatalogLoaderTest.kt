@@ -98,7 +98,7 @@ class SongCatalogLoaderTest {
         // available() is deliberately zero and every bulk read is capped at two bytes. This
         // catches implementations that size one read from available() or assume a full read.
         val stream = ShortReadingInputStream(
-            Files.newInputStream(repositoryRoot().resolve("assets/songs.xml")),
+            Files.newInputStream(repositoryRoot().resolve("app/src/main/assets/songs.xml")),
             maxChunk = 2,
         )
         val loader = SongCatalogLoader(

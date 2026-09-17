@@ -17,16 +17,16 @@ class BuildInputsTest {
         val root = repositoryRoot()
 
         assertEquals(
-            "assets/songs.xml hash drifted from the recorded baseline",
+            "app/src/main/assets/songs.xml hash drifted from the recorded baseline",
             SONGS_SHA_256,
-            sha256(root.resolve("assets/songs.xml")),
+            sha256(root.resolve("app/src/main/assets/songs.xml")),
         )
     }
 
     @Test
     fun preferencesUseLegacyResourceIdentifiers() {
         val root = repositoryRoot()
-        val stringsXml = root.resolve("res/values/strings.xml")
+        val stringsXml = root.resolve("app/src/main/res/values/strings.xml")
         assertTrue("Missing preference resource file: $stringsXml", Files.exists(stringsXml))
 
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stringsXml.toFile())

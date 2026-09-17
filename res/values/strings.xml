@@ -20,11 +20,11 @@
     <string name="night_mode_pref_key">nightMode</string>
 
     <string name="youtube_menu">youtube搜索</string>
-    <string name="bilibili_menu">bilibili搜索</string>
+    <string name="douyin_menu">抖音搜索</string>
     <string name="youtube">youtube</string>
-    <string name="bilibili">bilibili</string>
+    <string name="douyin">douyin</string>
     <string name="youtube_url">http://m.youtube.com/results?q=</string>
-    <string name="bilibili_url">https://search.bilibili.com/all?keyword=</string>
+    <string name="douyin_url">https://so.douyin.com/s?keyword=</string>
     <string name="alert_title">没有连接wifi</string>
     <string name="alert_message">将使用手机流量，是否继续？</string>
     <string name="ok_button">继续</string>

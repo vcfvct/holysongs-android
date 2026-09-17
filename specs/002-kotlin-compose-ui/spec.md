@@ -5,7 +5,7 @@
 **Created**: 2026-09-15
 
 **Status**: Complete and owner-accepted on 2026-09-16. Kotlin/Compose hosts cover the song list,
-lyric reader, settings, and about screens; the retained Java video boundary is hardened. The owner
+lyric reader, settings, and about screens; the Kotlin/View video boundary is hardened. The owner
 reported testing the complete app on a phone and accepted the result as looking great. The final PR
 candidate passes the clean local CLI build, JVM tests, lint, and androidTest APK assembly. API 23
 runtime remains explicitly waived and untested. Earlier evidence records retain their narrower

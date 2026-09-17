@@ -93,8 +93,7 @@ public class VideoSearch extends Activity {
 
     static boolean isSupportedTarget(android.content.Context context, String value) {
         return context.getString(R.string.youtube).equals(value)
-                || context.getString(R.string.youku).equals(value)
-                || context.getString(R.string.tudou).equals(value);
+                || context.getString(R.string.bilibili).equals(value);
     }
 
     static boolean hasUsableRestoredState(WebBackForwardList restored) {
@@ -113,10 +112,10 @@ public class VideoSearch extends Activity {
         if (context.getString(R.string.youtube).equals(target)) {
             return context.getString(R.string.youtube_url) + encodedTitle;
         }
-        if (context.getString(R.string.youku).equals(target)) {
-            return context.getString(R.string.youku_url) + encodedTitle;
+        if (context.getString(R.string.bilibili).equals(target)) {
+            return context.getString(R.string.bilibili_url) + encodedTitle;
         }
-        return context.getString(R.string.tudou_url) + encodedTitle;
+        return null;
     }
 
     // Package-private seams keep deterministic instrumentation assertions out of the public API.

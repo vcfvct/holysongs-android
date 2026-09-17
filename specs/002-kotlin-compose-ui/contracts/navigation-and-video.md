@@ -43,8 +43,7 @@ theme restart. Guard custom Back handling only where needed so normal system Bac
 | Target String | Baseline prefix |
 |---|---|
 | `youtube` | `http://m.youtube.com/results?q=` |
-| `youku` | `http://www.soku.com/m/y/video?q=` |
-| `tudou` | `http://www.soku.com/m/t/video?q=` |
+| `bilibili` | `https://search.bilibili.com/all?keyword=` |
 
 - **N3-QUERY**: Validate exact target and nonempty title. URL construction preserves search intent
   and encodes the Chinese query using UTF-8. Audit baseline/redirect/final URL, status and actual

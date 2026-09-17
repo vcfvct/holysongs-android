@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +34,14 @@ class VideoSearchTest {
             },
             {
                 putExtra(DisplayLyricActivity.SEARCH_TARGET, "unsupported")
+                putExtra(MainActivity.SONG_NAME, "一首歌")
+            },
+            {
+                putExtra(DisplayLyricActivity.SEARCH_TARGET, "youku")
+                putExtra(MainActivity.SONG_NAME, "一首歌")
+            },
+            {
+                putExtra(DisplayLyricActivity.SEARCH_TARGET, "tudou")
                 putExtra(MainActivity.SONG_NAME, "一首歌")
             },
             {
@@ -61,8 +70,7 @@ class VideoSearchTest {
         val title = "一首中文歌"
         val providers = listOf(
             context.getString(R.string.youtube) to context.getString(R.string.youtube_url),
-            context.getString(R.string.youku) to context.getString(R.string.youku_url),
-            context.getString(R.string.tudou) to context.getString(R.string.tudou_url)
+            context.getString(R.string.bilibili) to context.getString(R.string.bilibili_url)
         )
         providers.forEach { (target, prefix) ->
             val intent = Intent(context, VideoSearch::class.java)
@@ -70,20 +78,22 @@ class VideoSearchTest {
                 .putExtra(MainActivity.SONG_NAME, title)
             assertEquals(target, intent.getStringExtra(DisplayLyricActivity.SEARCH_TARGET))
             assertEquals(title, intent.getStringExtra(MainActivity.SONG_NAME))
-            // Provider identity is unchanged; only the query value is encoded.
             assertEquals(prefix, when (target) {
                 context.getString(R.string.youtube) -> context.getString(R.string.youtube_url)
-                context.getString(R.string.youku) -> context.getString(R.string.youku_url)
-                else -> context.getString(R.string.tudou_url)
+                else -> context.getString(R.string.bilibili_url)
             })
             assertEquals(prefix + Uri.encode(title), VideoSearch.searchUrlFor(context, target, title))
         }
+        assertTrue(VideoSearch.isSupportedTarget(context, context.getString(R.string.youtube)))
+        assertTrue(VideoSearch.isSupportedTarget(context, context.getString(R.string.bilibili)))
+        assertFalse(VideoSearch.isSupportedTarget(context, "youku"))
+        assertFalse(VideoSearch.isSupportedTarget(context, "tudou"))
         assertEquals("youtube", context.getString(R.string.youtube))
-        assertEquals("youku", context.getString(R.string.youku))
-        assertEquals("tudou", context.getString(R.string.tudou))
+        assertEquals("bilibili", context.getString(R.string.bilibili))
         assertEquals("http://m.youtube.com/results?q=", context.getString(R.string.youtube_url))
-        assertEquals("http://www.soku.com/m/y/video?q=", context.getString(R.string.youku_url))
-        assertEquals("http://www.soku.com/m/t/video?q=", context.getString(R.string.tudou_url))
+        assertEquals("https://search.bilibili.com/all?keyword=", context.getString(R.string.bilibili_url))
+        assertNull(VideoSearch.searchUrlFor(context, "youku", title))
+        assertNull(VideoSearch.searchUrlFor(context, "tudou", title))
 
         listOf("loading.html", "ok.html", "error-main-frame.html", "fullscreen.html",
             "geolocation.html", "ssl-error.html").forEach { name ->
@@ -99,12 +109,13 @@ class VideoSearchTest {
         val expectedQuery = Uri.encode(title)
         val providers = listOf(
             context.getString(R.string.youtube) to context.getString(R.string.youtube_url),
-            context.getString(R.string.youku) to context.getString(R.string.youku_url),
-            context.getString(R.string.tudou) to context.getString(R.string.tudou_url),
+            context.getString(R.string.bilibili) to context.getString(R.string.bilibili_url),
         )
         providers.forEach { (target, prefix) ->
             assertEquals(prefix + expectedQuery, VideoSearch.searchUrlFor(context, target, title))
         }
+        assertNull(VideoSearch.searchUrlFor(context, "youku", title))
+        assertNull(VideoSearch.searchUrlFor(context, "tudou", title))
         assertEquals("中文 & a/b?=+%", title)
     }
 

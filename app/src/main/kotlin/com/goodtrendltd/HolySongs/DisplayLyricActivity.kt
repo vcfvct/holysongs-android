@@ -140,6 +140,5 @@ class DisplayLyricActivity : ComponentActivity() {
 
     private fun isSupportedTarget(target: String): Boolean =
         target == getString(R.string.youtube) ||
-            target == getString(R.string.youku) ||
-            target == getString(R.string.tudou)
+            target == getString(R.string.bilibili)
 }

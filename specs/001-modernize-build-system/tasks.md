@@ -4,6 +4,14 @@ description: "Executable tasks for the HolySongs build-system modernization"
 
 # Tasks: Modernize HolySongs Build System
 
+> **Scope transition (2026-09-15):** The Gradle checkpoint was merged as PR #3 (`f62519b`).
+> The owner now requests incremental Kotlin/Compose adoption under
+> [feature 002](../002-kotlin-compose-ui/spec.md). Before resuming this checklist, consult the
+> [task disposition mapping](../002-kotlin-compose-ui/transition.md): unfinished compatibility
+> and verification outcomes carry forward, while legacy Java/UI-specific prescriptions are
+> replaced where appropriate. Existing checkboxes remain historical; this transition marks
+> no task complete and approves no minimum Android version change.
+
 **Input**: Design documents from `specs/001-modernize-build-system/`
 
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),

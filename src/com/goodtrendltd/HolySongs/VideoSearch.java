@@ -1,86 +1,198 @@
 package com.goodtrendltd.HolySongs;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.View;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.WebBackForwardList;
 
-/**
- * Created with IntelliJ IDEA.
- * User: LeOn
- * Date: 13-11-3
- * Time: 上午8:40
- */
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+
+/** Retained Java video-search screen. */
 public class VideoSearch extends Activity {
     private String target;
     private String songName;
     private HTML5WebView webView;
-    private ProgressDialog pd;
+    private boolean released;
+    private OnBackInvokedCallback modernBackCallback;
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        target = intent.getStringExtra(DisplayLyricActivity.SEARCH_TARGET);
-        songName = intent.getStringExtra(MainActivity.SONG_NAME);
+        Bundle extras = intent == null ? null : intent.getExtras();
+        target = validStringExtra(extras, DisplayLyricActivity.SEARCH_TARGET);
+        songName = validStringExtra(extras, MainActivity.SONG_NAME);
+        if (!isValidTarget(target) || songName == null || songName.length() == 0) {
+            finish();
+            return;
+        }
 
         webView = new HTML5WebView(this);
+        setContentView(webView.getLayout());
 
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState);
-        } else {
+        if (savedInstanceState != null && !webView.isReleased()) {
+            WebBackForwardList restored = webView.restoreState(savedInstanceState);
+            if (!hasUsableRestoredState(restored)) {
+                webView.loadUrl(getSearchUrl());
+            }
+        } else if (!released) {
             webView.loadUrl(getSearchUrl());
         }
-        setContentView(webView.getLayout());
+        registerModernBackCallback();
+    }
+
+    private void registerModernBackCallback() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return;
+        }
+        modernBackCallback = () -> handleBack();
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, modernBackCallback);
+    }
+
+    private boolean handleBack() {
+        if (webView != null && !released) {
+            if (webView.isLoading()) {
+                webView.cancelLoading();
+                return true;
+            }
+            if (webView.inCustomView()) {
+                webView.hideCustomView();
+                return true;
+            }
+            if (webView.canGoBack()) {
+                webView.goBack();
+                return true;
+            }
+        }
+        finish();
+        return true;
+    }
+
+    private static String validStringExtra(Bundle extras, String key) {
+        if (extras == null || key == null || !extras.containsKey(key)) {
+            return null;
+        }
+        Object value = extras.get(key);
+        return value instanceof String ? (String) value : null;
+    }
+
+    private boolean isValidTarget(String value) {
+        return isSupportedTarget(this, value);
     }
 
     private String getSearchUrl() {
-        String url = "";
-        if (getString(R.string.youtube).equals(target)) {
-            url = getString(R.string.youtube_url) + songName;
-        } else if (getString(R.string.youku).equals(target)) {
-            url = getString(R.string.youku_url) + songName;
-        } else if (getString(R.string.tudou).equals(target)) {
-            url = getString(R.string.tudou_url) + songName;
-        }
-        return url;
+        return searchUrlFor(this, target, songName);
     }
 
-    //override this to make sure video stops playing after use hit back button.
+    static boolean isSupportedTarget(android.content.Context context, String value) {
+        return context.getString(R.string.youtube).equals(value)
+                || context.getString(R.string.youku).equals(value)
+                || context.getString(R.string.tudou).equals(value);
+    }
+
+    static boolean hasUsableRestoredState(WebBackForwardList restored) {
+        return restored != null && hasUsableRestoredEntryCount(restored.getSize());
+    }
+
+    static boolean hasUsableRestoredEntryCount(int entryCount) {
+        return entryCount > 0;
+    }
+
+    static String searchUrlFor(android.content.Context context, String target, String title) {
+        if (title == null || title.length() == 0 || !isSupportedTarget(context, target)) {
+            return null;
+        }
+        String encodedTitle = Uri.encode(title);
+        if (context.getString(R.string.youtube).equals(target)) {
+            return context.getString(R.string.youtube_url) + encodedTitle;
+        }
+        if (context.getString(R.string.youku).equals(target)) {
+            return context.getString(R.string.youku_url) + encodedTitle;
+        }
+        return context.getString(R.string.tudou_url) + encodedTitle;
+    }
+
+    // Package-private seams keep deterministic instrumentation assertions out of the public API.
+    String validatedTargetForTest() {
+        return target;
+    }
+
+    String searchUrlForTest() {
+        return getSearchUrl();
+    }
+
+    boolean hasLiveWebViewForTest() {
+        return webView != null && !webView.isReleased();
+    }
+
+    HTML5WebView webViewForTest() {
+        return webView;
+    }
+
+    /** API23-and-older fallback; API33+ uses OnBackInvokedDispatcher above. */
+    @SuppressLint("GestureBackNavigation")
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {
-            webView.goBack();
-            return true;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return handleBack();
         }
         return super.onKeyDown(keyCode, event);
     }
 
     @Override
     public void onPause() {
-        webView.stopLoading();
-        webView.setVisibility(View.GONE);
-        webView.destroy();
+        if (webView != null && !released) {
+            webView.setHostActive(false);
+            webView.pauseForHost();
+        }
         super.onPause();
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (webView != null && !released) {
+            webView.setHostActive(true);
+            webView.resumeForHost();
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
+        if (webView != null && !released) {
+            webView.saveState(outState);
+        }
         super.onSaveInstanceState(outState);
-        webView.saveState(outState);
     }
 
     @Override
     public void onStop() {
+        if (webView != null && !released) {
+            webView.setHostActive(false);
+        }
         super.onStop();
-        webView.stopLoading();
     }
 
+    @Override
+    protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && modernBackCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(modernBackCallback);
+            modernBackCallback = null;
+        }
+        if (!released) {
+            released = true;
+            if (webView != null) {
+                webView.release();
+                webView = null;
+            }
+        }
+        super.onDestroy();
+    }
 }

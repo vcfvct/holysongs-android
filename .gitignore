@@ -11,6 +11,7 @@ gradle/gradle-daemon-jvm.properties
 local.properties
 *.class
 *.jar
+*.aab
 !/gradle/wrapper/gradle-wrapper.jar
 !/libs/pinyin4j-2.5.0.jar
 *.iml

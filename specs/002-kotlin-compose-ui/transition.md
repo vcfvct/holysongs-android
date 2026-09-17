@@ -14,7 +14,14 @@ principle: build checkpoint, bounded UI slices, and regression verification betw
 The predecessor's Java-only, Holo-preservation, and no-Compose constraints describe feature
 001; they are not restrictions on the explicitly requested feature 002. Feature 002 permits
 Compose UI and corresponding styling changes while preserving data, settings, offline use,
-and existing actions. On 2026-09-15 the owner separately approved dropping old Android support
+and existing actions.
+
+On 2026-09-17 the owner separately approved replacing the repository-hosted
+`libs/pinyin4j-2.5.0.jar` with the pinned Maven Central coordinate
+`com.belerweb:pinyin4j:2.5.0` under issue #19. This changes dependency delivery, not the
+preserved pinyin semantics. Earlier bundled-JAR requirements, hashes, and evidence remain
+historical records of the baselines to which they apply; current build and verification
+instructions use the locked Maven dependency instead. On 2026-09-15 the owner separately approved dropping old Android support
 in response to the API 23 (Android 6.0) minimum proposal: "yes, dropping old android is fine."
 Feature 002 therefore adopts API 23 as its support floor, subject to dependency verification;
 API 14–22 devices cannot install or update to the new build. A higher floor requires renewed

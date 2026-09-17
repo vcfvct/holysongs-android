@@ -13,18 +13,13 @@ import org.w3c.dom.Node
 
 class BuildInputsTest {
     @Test
-    fun sourceAssetAndJarStayOnBaselineHashes() {
+    fun sourceAssetStaysOnBaselineHash() {
         val root = repositoryRoot()
 
         assertEquals(
             "assets/songs.xml hash drifted from the recorded baseline",
             SONGS_SHA_256,
             sha256(root.resolve("assets/songs.xml")),
-        )
-        assertEquals(
-            "libs/pinyin4j-2.5.0.jar hash drifted from the recorded baseline",
-            PINYIN_JAR_SHA_256,
-            sha256(root.resolve("libs/pinyin4j-2.5.0.jar")),
         )
     }
 
@@ -68,7 +63,6 @@ class BuildInputsTest {
 
     companion object {
         private const val SONGS_SHA_256 = "88eb0db602e018b49a327947dd8607f04e6159e58f39ec38ed59f20c39af9d89"
-        private const val PINYIN_JAR_SHA_256 = "6576dea7d351a0f5df1595b9c432ba7cf9246ca0ab6f7019b9ca4e6d500b0e68"
         private const val REPOSITORY_ROOT_PROPERTY = "repositoryRoot"
     }
 }

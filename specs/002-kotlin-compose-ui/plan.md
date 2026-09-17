@@ -14,8 +14,10 @@ historical and intentionally distinguishes automated evidence from the owner's f
 
 Apply the owner's [2026-09-15 continuation decisions](evidence/execution-decisions.md): accept
 owner-attested Studio build and existing Java25 daemon, waive API23 runtime/fixture execution,
-retain minSdk23/dependency compatibility and all API37 scenario/safety gates. The original
-two-endpoint plan below remains historical; never describe the waived endpoint as tested.
+retain minSdk23/dependency compatibility and all API37 scenario/safety gates. Apply the recorded
+2026-09-16 JVM compatibility approval in the same file: application Java/Kotlin target11 supersedes
+the original target8 clauses while JDK17 remains the build toolchain. The original two-endpoint and
+JVM8 planning text remains historical evidence; never describe the waived endpoint as tested.
 
 ## Summary
 
@@ -35,7 +37,7 @@ this planning command, and the owner's existing `res/layout/main.xml` edit remai
 ## Technical Context
 
 **Language/Version**: Kotlin2.2.10 via AGP built-in Kotlin; Compose compiler plugin2.2.10;
-Java8 source/target and aligned Kotlin JVM8; JDK17 build runtime/toolchain; Groovy Gradle scripts.
+owner-approved Java/Kotlin JVM11 application target; JDK17 build runtime/toolchain; Groovy Gradle scripts.
 
 **Primary Dependencies**: AGP9.4.0, Gradle9.6.0; Compose BOM2026.09.00 (UI/Foundation/Runtime/tests1.12.1,
 Material3 1.4.0); Activity Compose1.13.0; Lifecycle runtime-compose/viewmodel-compose/viewmodel-savedstate2.11.0;
@@ -67,8 +69,9 @@ Manifest permissions follow build contract B2's exact allowlist: the two existin
 permissions plus AndroidX Core's app-private signature declaration/use only. No other new
 permissions, including dangerous/runtime permissions, are authorized.
 
-**Scale/Scope**: Four core reader Activities, one retained Java/View video Activity, 26-letter
-sidebar, eight duplicate source-title pairs, eight font sizes, two themes and three video providers.
+**Scale/Scope**: Four core reader Activities, one Kotlin/programmatic-View video Activity,
+26-letter Compose sidebar, eight duplicate source-title pairs, eight font sizes, two themes and
+two retained video providers.
 
 ## Constitution Check
 
@@ -117,12 +120,10 @@ scenario definitions and sanitized results; absence of runtime records is not a 
 AndroidManifest.xml                     # Root mapping retained; per-migrated-screen window themes
 build.gradle / gradle.properties         # Matching Compose plugin, built-in Kotlin, AndroidX
 app/build.gradle                        # min23, Compose, Kotlin roots, tests and dependency locks
-src/com/goodtrendltd/HolySongs/
-├── helpers/*.java                      # Retained XMLParser / ChineseCharComp / HanziHelper
-├── VideoSearch.java / HTML5WebView.java # Retained, scoped lifecycle/security/Back corrections
-└── legacy UI *.java                    # Remove each only with verified same-name Kotlin replacement
 app/src/main/kotlin/com/goodtrendltd/HolySongs/
 ├── MainActivity.kt
+├── VideoSearch.kt / HTML5WebView.kt    # Same-identity Kotlin video boundary; programmatic View host
+├── helpers/                            # XMLParser / ChineseCharComp / HanziHelper
 ├── DisplayLyricActivity.kt
 ├── SettingsActivity.kt
 ├── AboutActivity.kt
@@ -136,16 +137,15 @@ app/src/main/kotlin/com/goodtrendltd/HolySongs/
     ├── SongListScreen.kt / LetterSidebar.kt
     ├── LyricScreen.kt / SettingsScreen.kt / AboutScreen.kt
     └── HolySongsTheme.kt
-app/src/test/java/                      # Existing Java tests retained and completed
-app/src/test/kotlin/                    # Production loader/index/state tests
+app/src/test/kotlin/                    # Catalog/helper/loader/index/state tests
 app/src/androidTest/kotlin/             # Real Activity UI/preferences/interop tests and fixtures
-res/ / assets/ / libs/                   # Existing mapped roots; remove only verified unused UI resources
+res/ / assets/ / libs/                  # Required values/drawables, catalog asset and pinyin JAR
 ```
 
-**Structure decision:** New Kotlin uses conventional module-local roots explicitly registered on
-Android source sets' Kotlin directories. Java remains `../src`; no bulk relocation. Root manifest,
-res/assets mapping and JVM-test repositoryRoot property remain. Public constants remain Java-callable;
-never compile a legacy Java Activity and replacement Kotlin Activity with the same fully qualified name.
+**Structure decision:** Kotlin uses conventional module-local roots explicitly registered on Android
+source sets' Kotlin directories. The completed cleanup removed project-owned Java and obsolete View
+layout/menu XML after same-identity Kotlin replacements were verified. Root manifest, res/assets mapping,
+bundled pinyin JAR, and JVM-test `repositoryRoot` property remain. Public constants remain Java-callable.
 
 ## Phase 0: Research Outcomes
 
@@ -153,15 +153,16 @@ never compile a legacy Java Activity and replacement Kotlin Activity with the sa
 
 1. Primary AGP9.4 POM/module confirms KGP2.2.10; matching Compose compiler artifact exists.
    BOM/POM and direct AAR inspections support the selected API23/compile37 toolchain.
-2. Built-in Kotlin uses explicit Kotlin source-set wiring; keep Java/Kotlin target8, no separate
-   Kotlin Android plugin or legacy compiler-extension setting. Enable AndroidX without Jetifier
+2. Built-in Kotlin uses explicit Kotlin source-set wiring and the owner-approved Java/Kotlin target11;
+   do not add a separate Kotlin Android plugin or legacy compiler-extension setting. Enable AndroidX without Jetifier
    unless an actual dependency requires it; the vendored pinyin JAR is not an Android support library.
 3. Keep multi-Activity architecture; migrate full screen content, not navigation/storage frameworks.
 4. Extract the real load/index pipeline and preserve fixtures before fixes; do not silently substitute
    a first-initial scan or pinyin sort. Unsafe lookup destinations are safe no-ops, not fake parity.
 5. Scaffold/inset boundaries, saved UI state and observable legacy preferences replace window/stack
    workarounds. Kotlin/Compose adoption alone is not a verified fix for the owner's overlap.
-6. Retain Java WebView while repairing ownership/network/Back/security; audit providers separately.
+6. Preserve the WebView boundary behavior while migrating its host to Kotlin/programmatic Views;
+   audit providers separately and do not change them without approval.
 7. Use production/JVM and real runtime tests with artifact-linked evidence and known accessibility scope.
 
 Full transitive resolution/lock verification, mixed compilation, IDE/device checks and provider

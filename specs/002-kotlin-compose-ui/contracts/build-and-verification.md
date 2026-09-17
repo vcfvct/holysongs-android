@@ -11,10 +11,12 @@
 | `./gradlew :app:connectedDebugAndroidTest` | Required device tests pass on explicitly selected dedicated endpoint |
 | Android Studio Quail4 / 2026.1.4 | Sync/build with local JDK17 and wrapper, no tracked machine configuration changes |
 
-Keep Java/Kotlin application JVM target8, compile/target37, Build Tools36.0.0; minSdk23. Source
-mapping must compile legacy Java at `src/` and new module-local Kotlin, while retaining root
-manifest/resources/assets and module-local Java tests. Preserve the JVM-test repositoryRoot input.
-Do not introduce duplicate fully qualified Activity definitions during replacement.
+Keep the application JVM target at 11, compile/target37, Build Tools36.0.0, and minSdk23. JVM11
+is the owner-approved minimum required by the resolved Compose 1.12.1 inline APIs; this supersedes
+the original JVM8 planning constraint without changing the JDK17 build toolchain or Android support
+floor. The completed source mapping is Kotlin-only under the module while retaining the root
+manifest/resources/assets. Preserve the JVM-test `repositoryRoot` input and do not introduce
+duplicate fully qualified Activity definitions during replacement.
 
 Root declaration and applied app Compose compiler plugin use version2.2.10; remove the Java-only
 built-in-Kotlin opt-out. Do not apply `org.jetbrains.kotlin.android` or legacy compiler-extension

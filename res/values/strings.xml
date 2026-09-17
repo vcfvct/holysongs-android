@@ -44,16 +44,4 @@
         <item>28</item>
         <item>30</item>
     </string-array>
-
-    <style name="MyHoloTheme" parent="@android:style/Theme.Holo">
-        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
-    </style>
-
-    <style name="MyHoloLightTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
-    </style>
-
-    <style name="OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
-        <item name="android:src">@drawable/video_icon</item>
-    </style>
 </resources>

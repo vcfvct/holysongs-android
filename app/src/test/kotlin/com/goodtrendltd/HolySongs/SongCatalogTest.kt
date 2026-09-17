@@ -130,7 +130,7 @@ class SongCatalogTest {
     }
 
     private fun actualSongs(): NodeList {
-        val xml = String(Files.readAllBytes(repositoryRoot().resolve("assets/songs.xml")), StandardCharsets.UTF_8)
+        val xml = String(Files.readAllBytes(repositoryRoot().resolve("app/src/main/assets/songs.xml")), StandardCharsets.UTF_8)
         val document = parser.getDomElement(xml)
         assertNotNull("The real XMLParser must parse the bundled source", document)
         return document!!.getElementsByTagName("song")

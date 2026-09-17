@@ -1,0 +1,2 @@
+# Preserve the bundled catalog byte-for-byte; tests pin its SHA-256.
+app/src/main/assets/songs.xml -text

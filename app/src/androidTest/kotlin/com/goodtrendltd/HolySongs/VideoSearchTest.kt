@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.goodtrendltd.HolySongs
 
 import android.content.Intent

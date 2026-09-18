@@ -39,6 +39,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.goodtrendltd.HolySongs.data.SongCatalogLoader
+import com.goodtrendltd.HolySongs.data.StoredSong
 import com.goodtrendltd.HolySongs.ui.ABOUT_CONTENT
 import com.goodtrendltd.HolySongs.helpers.HanziHelper
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -157,9 +157,9 @@ class SongListScreenTest {
         try {
             MainActivity.catalogLoaderFactory = { _ ->
                 SongCatalogLoader(
-                    openAsset = {
+                    readSongs = {
                         openerCalls.incrementAndGet()
-                        ByteArrayInputStream(minimalCatalogXml(64).toByteArray(Charsets.UTF_8))
+                        minimalCatalogRows(64)
                     },
                     dispatcher = Dispatchers.IO
                 )
@@ -204,9 +204,9 @@ class SongListScreenTest {
         try {
             MainActivity.catalogLoaderFactory = { _ ->
                 SongCatalogLoader(
-                    openAsset = {
+                    readSongs = {
                         check(release.await(10, TimeUnit.SECONDS)) { "loading gate timed out" }
-                        ByteArrayInputStream(minimalCatalogXml(1).toByteArray(Charsets.UTF_8))
+                        minimalCatalogRows(1)
                     },
                     dispatcher = Dispatchers.IO
                 )
@@ -230,11 +230,11 @@ class SongListScreenTest {
         try {
             MainActivity.catalogLoaderFactory = { _ ->
                 SongCatalogLoader(
-                    openAsset = {
+                    readSongs = {
                         if (attempts.getAndIncrement() == 0) {
                             throw IOException("controlled catalog failure")
                         }
-                        ByteArrayInputStream(minimalCatalogXml(1).toByteArray(Charsets.UTF_8))
+                        minimalCatalogRows(1)
                     },
                     dispatcher = Dispatchers.IO
                 )
@@ -268,7 +268,7 @@ class SongListScreenTest {
         try {
             MainActivity.catalogLoaderFactory = { _ ->
                 SongCatalogLoader(
-                    openAsset = { ByteArrayInputStream("<songs></songs>".toByteArray()) },
+                    readSongs = { emptyList() },
                     dispatcher = Dispatchers.IO
                 )
             }
@@ -614,9 +614,9 @@ class SongListScreenTest {
             seedKnownPreferenceTypes()
             MainActivity.catalogLoaderFactory = { _ ->
                 SongCatalogLoader(
-                    openAsset = {
+                    readSongs = {
                         openerCalls.incrementAndGet()
-                        ByteArrayInputStream(minimalCatalogXml(64).toByteArray(Charsets.UTF_8))
+                        minimalCatalogRows(64)
                     },
                     dispatcher = Dispatchers.IO
                 )
@@ -1040,17 +1040,14 @@ class SongListScreenTest {
         ).map { title -> byTitle[title] ?: error("missing fixture winner $title") }
     }
 
-    private fun minimalCatalogXml(rowCount: Int): String = buildString {
-        append("<songs>")
-        repeat(rowCount) { index ->
-            append("<song><name>测试歌")
-            append(index)
-            append("</name><lyric>测试歌词")
-            append(index)
-            append("</lyric></song>")
+    private fun minimalCatalogRows(rowCount: Int): List<StoredSong> =
+        List(rowCount) { index ->
+            StoredSong(
+                title = "测试歌$index",
+                lyric = "测试歌词$index",
+                sourceOrder = index,
+            )
         }
-        append("</songs>")
-    }
 
     private fun getString(id: Int) = targetContext.getString(id)
 

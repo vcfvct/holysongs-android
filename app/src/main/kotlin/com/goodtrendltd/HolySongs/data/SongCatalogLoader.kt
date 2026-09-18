@@ -2,37 +2,35 @@ package com.goodtrendltd.HolySongs.data
 
 import com.goodtrendltd.HolySongs.helpers.ChineseCharComp
 import com.goodtrendltd.HolySongs.helpers.HanziHelper
-import com.goodtrendltd.HolySongs.helpers.XMLParser
-import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.w3c.dom.Element
 
-/** Loads the legacy songs asset without changing its parser or ordering rules. */
+/** Loads validated stored rows and derives the established immutable catalog view. */
 class SongCatalogLoader(
-    private val openAsset: () -> java.io.InputStream,
+    private val readSongs: () -> List<StoredSong>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     suspend fun load(): SongCatalog = withContext(dispatcher) {
-        val xml = openAsset().use { input ->
-            input.readBytes().toString(StandardCharsets.UTF_8)
-        }.replace(" ", "")
-
-        val parser = XMLParser()
-        val document = parser.getDomElement(xml)
-            ?: throw IllegalArgumentException("Unable to parse song catalog XML")
-        val songs = document.getElementsByTagName("song")
-        val lyricsByTitle = HashMap<String, String>(songs.length)
-        for (position in 0 until songs.length) {
-            val song = songs.item(position) as? Element
-                ?: throw IllegalArgumentException("Song entry $position is not an element")
-            val name = parser.getValue(song, "name")
-            val lyric = parser.getValue(song, "lyric")
-            if (name.isEmpty() || lyric.isEmpty()) {
-                throw IllegalArgumentException("Song entry $position has an empty required field")
+        val songs = readSongs()
+        val orderedBySource = songs.sortedBy(StoredSong::sourceOrder)
+        orderedBySource.forEachIndexed { expectedOrder, song ->
+            require(song.sourceOrder == expectedOrder) {
+                "Song source order must be contiguous from zero; expected $expectedOrder, found ${song.sourceOrder}"
             }
-            lyricsByTitle[name] = lyric
+            require(song.title.isNotEmpty()) { "Song entry $expectedOrder has an empty title" }
+            require(song.lyric.isNotEmpty()) { "Song entry $expectedOrder has an empty lyric" }
+        }
+        require(orderedBySource.map(StoredSong::sourceOrder).toSet().size == orderedBySource.size) {
+            "Song source orders must be unique"
+        }
+
+        val lyricsByTitle = HashMap<String, String>(orderedBySource.size)
+        orderedBySource.forEach { song ->
+            require(!lyricsByTitle.containsKey(song.title)) {
+                "Duplicate stored song title ${song.title}"
+            }
+            lyricsByTitle[song.title] = song.lyric
         }
 
         val orderedTitles = lyricsByTitle.keys.toList().sortedWith(ChineseCharComp())

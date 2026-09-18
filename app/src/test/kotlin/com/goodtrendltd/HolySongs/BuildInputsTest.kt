@@ -13,13 +13,18 @@ import org.w3c.dom.Node
 
 class BuildInputsTest {
     @Test
-    fun sourceAssetStaysOnBaselineHash() {
+    fun canonicalAndHistoricalCatalogsStayOnApprovedHashes() {
         val root = repositoryRoot()
 
         assertEquals(
-            "app/src/main/assets/songs.xml hash drifted from the recorded baseline",
-            SONGS_SHA_256,
+            "app/src/main/assets/songs.xml drifted from the approved deduplicated source",
+            CANONICAL_SONGS_SHA_256,
             sha256(root.resolve("app/src/main/assets/songs.xml")),
+        )
+        assertEquals(
+            "The historical 422-entry baseline must remain unchanged",
+            HISTORICAL_SONGS_SHA_256,
+            sha256(root.resolve("app/src/test/resources/catalog-baseline.xml")),
         )
     }
 
@@ -62,7 +67,9 @@ class BuildInputsTest {
     }
 
     companion object {
-        private const val SONGS_SHA_256 = "88eb0db602e018b49a327947dd8607f04e6159e58f39ec38ed59f20c39af9d89"
+        // Updated only with an approved canonical-source edit.
+        private const val CANONICAL_SONGS_SHA_256 = "d6f0e9bed1a2031335613e746e3983842b3462a4d91c4a3d7c04537ba609e85e"
+        private const val HISTORICAL_SONGS_SHA_256 = "d63120cb5bf336c65e0ade44bc28f554cf096e41675ff3d85a4bb08f3edce658"
         private const val REPOSITORY_ROOT_PROPERTY = "repositoryRoot"
     }
 }

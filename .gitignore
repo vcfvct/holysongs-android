@@ -16,6 +16,15 @@ local.properties
 *.iml
 *.log
 .env*
+
+# Python catalog tooling
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+*.egg-info/
+
 *.jks
 *.keystore
 keystore.properties

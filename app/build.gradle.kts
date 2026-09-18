@@ -1,6 +1,55 @@
+import javax.inject.Inject
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+@CacheableTask
+abstract class GenerateSongDatabase @Inject constructor(
+    private val execOperations: ExecOperations,
+) : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sourceXml: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val schemaSql: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val generatorScript: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val output = outputDirectory.file("songs.db").get().asFile
+        output.parentFile.mkdirs()
+        execOperations.exec {
+            commandLine(
+                "python3",
+                generatorScript.get().asFile.absolutePath,
+                "generate",
+                "--source", sourceXml.get().asFile.absolutePath,
+                "--schema", schemaSql.get().asFile.absolutePath,
+                "--output", output.absolutePath,
+                "--expected-count", "414",
+            )
+        }.assertNormalExitValue()
+    }
 }
 
 java {
@@ -11,6 +60,50 @@ java {
 
 dependencyLocking {
     lockAllConfigurations()
+}
+
+val catalogSource = layout.projectDirectory.file("src/main/assets/songs.xml")
+val catalogSchema = rootProject.layout.projectDirectory.file("tools/catalog/schema.sql")
+val catalogGenerator = rootProject.layout.projectDirectory.file("tools/catalog/generate_song_database.py")
+val catalogBaseline = layout.projectDirectory.file("src/test/resources/catalog-baseline.xml")
+val generatedCatalogAssets = layout.buildDirectory.dir("generated/songCatalog/assets")
+val generatedCatalogDatabase = generatedCatalogAssets.map { it.file("songs.db") }
+
+val generateSongDatabase = tasks.register<GenerateSongDatabase>("generateSongDatabase") {
+    group = "build"
+    description = "Generates the packaged SQLite song catalog from canonical XML."
+    sourceXml.set(catalogSource)
+    schemaSql.set(catalogSchema)
+    generatorScript.set(catalogGenerator)
+    outputDirectory.set(generatedCatalogAssets)
+}
+
+val testSongCatalogGenerator = tasks.register<Exec>("testSongCatalogGenerator") {
+    group = "verification"
+    description = "Runs the Python catalog generator tests."
+    workingDir(rootProject.projectDir)
+    commandLine("python3", "-m", "unittest", "discover", "-s", "tools/catalog/tests", "-p", "test_*.py")
+    inputs.dir(rootProject.layout.projectDirectory.dir("tools/catalog/tests"))
+    inputs.files(catalogSource, catalogSchema, catalogGenerator, catalogBaseline)
+}
+
+val verifySongCatalog = tasks.register<Exec>("verifySongCatalog") {
+    group = "verification"
+    description = "Verifies generated SQLite content against XML and the historical baseline."
+    dependsOn(generateSongDatabase, testSongCatalogGenerator)
+    workingDir(rootProject.projectDir)
+    commandLine(
+        "python3",
+        catalogGenerator.asFile.absolutePath,
+        "verify",
+        "--source", catalogSource.asFile.absolutePath,
+        "--schema", catalogSchema.asFile.absolutePath,
+        "--database", generatedCatalogDatabase.get().asFile.absolutePath,
+        "--baseline", catalogBaseline.asFile.absolutePath,
+        "--expected-count", "414",
+    )
+    inputs.files(catalogSource, catalogSchema, catalogGenerator, catalogBaseline)
+    inputs.file(generatedCatalogDatabase)
 }
 
 android {
@@ -41,6 +134,19 @@ android {
             it.systemProperty("repositoryRoot", rootProject.projectDir.absolutePath)
         }
     }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addGeneratedSourceDirectory(
+            generateSongDatabase,
+            GenerateSongDatabase::outputDirectory,
+        )
+    }
+}
+
+tasks.named("check").configure {
+    dependsOn(verifySongCatalog)
 }
 
 kotlin {

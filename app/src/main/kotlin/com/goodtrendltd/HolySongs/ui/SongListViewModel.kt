@@ -20,8 +20,29 @@ class SongListViewModel(
     private val mutableState = MutableStateFlow<SongCatalogUiState>(SongCatalogUiState.Loading)
     val state: StateFlow<SongCatalogUiState> = mutableState.asStateFlow()
 
+    private val mutableSearchSession = MutableStateFlow(SearchSession())
+    val searchSession: StateFlow<SearchSession> = mutableSearchSession.asStateFlow()
+
     init {
         load()
+    }
+
+    fun enterSearch() {
+        mutableSearchSession.value = SearchSession(isActive = true)
+    }
+
+    fun updateSearchQuery(rawQuery: String) {
+        if (!mutableSearchSession.value.isActive) return
+        mutableSearchSession.value = SearchSession(isActive = true, query = rawQuery)
+    }
+
+    fun clearSearchQuery() {
+        if (!mutableSearchSession.value.isActive) return
+        mutableSearchSession.value = SearchSession(isActive = true)
+    }
+
+    fun exitSearch() {
+        mutableSearchSession.value = SearchSession()
     }
 
     /** Starts a new load only after a failed load has explicitly been retried. */
@@ -54,6 +75,15 @@ class SongListViewModel(
 
     private fun displayableReason(failure: Throwable): String =
         failure.message?.takeIf { it.isNotBlank() } ?: "Unable to load songs"
+}
+
+data class SearchSession(
+    val isActive: Boolean = false,
+    val query: String = "",
+) {
+    init {
+        require(isActive || query.isEmpty()) { "Inactive search sessions cannot retain a query" }
+    }
 }
 
 sealed interface SongCatalogUiState {

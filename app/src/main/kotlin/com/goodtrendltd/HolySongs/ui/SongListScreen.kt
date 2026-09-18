@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
@@ -25,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -39,7 +41,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -67,8 +72,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun SongListScreen(
     state: SongCatalogUiState,
+    searchSession: SearchSession,
     preferences: ReaderPreferenceSnapshot,
     onSongSelected: (title: String, lyric: String) -> Unit,
+    onEnterSearch: () -> Unit,
+    onSearchQueryChanged: (String) -> Unit,
+    onClearSearch: () -> Unit,
+    onExitSearch: () -> Unit,
     onSettings: () -> Unit,
     onAbout: () -> Unit,
     onShareApp: () -> Unit,
@@ -80,8 +90,29 @@ fun SongListScreen(
     var pendingSectionScroll by remember { mutableStateOf<Job?>(null) }
     // The overflow menu is transient UI state; do not restore an open popup across recreation.
     var actionsExpanded by remember { mutableStateOf(false) }
-    val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val browseListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val searchListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val activeListState = if (searchSession.isActive) searchListState else browseListState
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
+
+    BackHandler(enabled = searchSession.isActive, onBack = onExitSearch)
+
+    LaunchedEffect(searchSession.isActive) {
+        if (searchSession.isActive) {
+            pendingSectionScroll?.cancel()
+            pendingSectionScroll = null
+            indicatorLetter = null
+            indicatorGeneration++
+            searchListState.scrollToItem(0)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+    LaunchedEffect(searchSession.isActive, searchSession.query.trim()) {
+        if (searchSession.isActive) searchListState.scrollToItem(0)
+    }
 
     fun showIndicator(letter: String?) {
         if (letter != null) {
@@ -109,11 +140,11 @@ fun SongListScreen(
     }
 
     val catalog = (state as? SongCatalogUiState.Ready)?.catalog
-    LaunchedEffect(catalog, lifecycleOwner) {
-        if (catalog == null) return@LaunchedEffect
+    LaunchedEffect(catalog, lifecycleOwner, searchSession.isActive) {
+        if (catalog == null || searchSession.isActive) return@LaunchedEffect
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             snapshotFlow {
-                listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
+                browseListState.firstVisibleItemIndex to browseListState.firstVisibleItemScrollOffset
             }
                 .drop(1)
                 .distinctUntilChanged()
@@ -130,44 +161,85 @@ fun SongListScreen(
     }
 
     val moreActionsDescription = stringResource(R.string.more_actions)
+    val exitSearchDescription = stringResource(R.string.exit_search)
+    val clearSearchDescription = stringResource(R.string.clear_search_query)
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                actions = {
-                    Box {
+            if (searchSession.isActive) {
+                TopAppBar(
+                    navigationIcon = {
                         IconButton(
-                            onClick = { actionsExpanded = true },
-                            modifier = Modifier.semantics {
-                                contentDescription = moreActionsDescription
-                                stateDescription = if (actionsExpanded) "已展开" else "已收起"
-                            },
-                        ) { Text("⋮", style = MaterialTheme.typography.titleLarge) }
-                        DropdownMenu(
-                            expanded = actionsExpanded,
-                            onDismissRequest = { actionsExpanded = false },
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.settings_text)) },
-                                onClick = { actionsExpanded = false; onSettings() },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.about)) },
-                                onClick = { actionsExpanded = false; onAbout() },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.sharing_app_text)) },
-                                onClick = { actionsExpanded = false; onShareApp() },
-                            )
+                            onClick = onExitSearch,
+                            modifier = Modifier.semantics { contentDescription = exitSearchDescription },
+                        ) { Text("‹", style = MaterialTheme.typography.titleLarge) }
+                    },
+                    title = {
+                        TextField(
+                            value = searchSession.query,
+                            onValueChange = onSearchQueryChanged,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester)
+                                .testTag("search-query"),
+                            placeholder = { Text(stringResource(R.string.search_title_hint)) },
+                            singleLine = true,
+                        )
+                    },
+                    actions = {
+                        if (searchSession.query.isNotEmpty()) {
+                            IconButton(
+                                onClick = onClearSearch,
+                                modifier = Modifier.semantics { contentDescription = clearSearchDescription },
+                            ) { Text("×", style = MaterialTheme.typography.titleLarge) }
                         }
-                    }
-                },
-                windowInsets = WindowInsets.safeDrawing.only(
-                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
-                ),
-                colors = TopAppBarDefaults.topAppBarColors(),
-            )
+                    },
+                    windowInsets = WindowInsets.safeDrawing.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                    ),
+                    colors = TopAppBarDefaults.topAppBarColors(),
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(text = stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    actions = {
+                        Box {
+                            IconButton(
+                                onClick = { actionsExpanded = true },
+                                modifier = Modifier.semantics {
+                                    contentDescription = moreActionsDescription
+                                    stateDescription = if (actionsExpanded) "已展开" else "已收起"
+                                },
+                            ) { Text("⋮", style = MaterialTheme.typography.titleLarge) }
+                            DropdownMenu(
+                                expanded = actionsExpanded,
+                                onDismissRequest = { actionsExpanded = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.search_songs)) },
+                                    onClick = { actionsExpanded = false; onEnterSearch() },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.settings_text)) },
+                                    onClick = { actionsExpanded = false; onSettings() },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.about)) },
+                                    onClick = { actionsExpanded = false; onAbout() },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sharing_app_text)) },
+                                    onClick = { actionsExpanded = false; onShareApp() },
+                                )
+                            }
+                        }
+                    },
+                    windowInsets = WindowInsets.safeDrawing.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                    ),
+                    colors = TopAppBarDefaults.topAppBarColors(),
+                )
+            }
         },
     ) { innerPadding ->
         when (state) {
@@ -188,32 +260,37 @@ fun SongListScreen(
                     .testTag("catalog-error"),
             )
             is SongCatalogUiState.Ready -> {
-                if (state.catalog.orderedTitles.isEmpty()) {
-                    EmptyContent(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .consumeWindowInsets(innerPadding)
-                            .testTag("catalog-empty"),
-                    )
+                val visibleTitles = if (searchSession.isActive) {
+                    filterTitlesByQuery(state.catalog.orderedTitles, searchSession.query)
                 } else {
-                    ReadyContent(
+                    state.catalog.orderedTitles
+                }
+                val contentModifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                when {
+                    state.catalog.orderedTitles.isEmpty() -> EmptyContent(
+                        modifier = contentModifier.testTag("catalog-empty"),
+                    )
+                    searchSession.isActive && searchSession.query.trim().isNotEmpty() && visibleTitles.isEmpty() ->
+                        NoSearchResultsContent(
+                            modifier = contentModifier.testTag("search-no-results"),
+                        )
+                    else -> ReadyContent(
                         catalog = state.catalog,
-                        listState = listState,
-                        indicatorLetter = indicatorLetter,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .consumeWindowInsets(innerPadding),
+                        visibleTitles = visibleTitles,
+                        listState = activeListState,
+                        showSidebar = !searchSession.isActive,
+                        indicatorLetter = if (searchSession.isActive) null else indicatorLetter,
+                        modifier = contentModifier,
                         onSongSelected = onSongSelected,
                         onSectionSelected = { section ->
                             val destination = state.catalog.sectionIndex.getPositionForSection(section)
                             if (destination != null) {
                                 pendingSectionScroll?.cancel()
                                 pendingSectionScroll = scope.launch {
-                                    // Jump atomically so list-position observation cannot keep
-                                    // restarting the section indicator during a long animation.
-                                    listState.scrollToItem(destination)
+                                    browseListState.scrollToItem(destination)
                                     showIndicator(state.catalog.initials.getOrNull(destination))
                                 }
                             }
@@ -229,7 +306,9 @@ fun SongListScreen(
 @Composable
 private fun ReadyContent(
     catalog: SongCatalog,
+    visibleTitles: List<String>,
     listState: LazyListState,
+    showSidebar: Boolean,
     indicatorLetter: String?,
     modifier: Modifier,
     onSongSelected: (String, String) -> Unit,
@@ -245,7 +324,7 @@ private fun ReadyContent(
                 state = listState,
             ) {
                 items(
-                    items = catalog.orderedTitles,
+                    items = visibleTitles,
                     key = { it },
                 ) { title ->
                     Text(
@@ -263,11 +342,13 @@ private fun ReadyContent(
                     )
                 }
             }
-            LetterSidebar(
-                sectionIndex = catalog.sectionIndex,
-                onSectionSelected = onSectionSelected,
-                modifier = Modifier.testTag("letter-sidebar"),
-            )
+            if (showSidebar) {
+                LetterSidebar(
+                    sectionIndex = catalog.sectionIndex,
+                    onSectionSelected = onSectionSelected,
+                    modifier = Modifier.testTag("letter-sidebar"),
+                )
+            }
         }
         if (indicatorLetter != null) {
             Box(
@@ -314,5 +395,12 @@ private fun ErrorContent(reason: String, onRetry: () -> Unit, modifier: Modifier
 private fun EmptyContent(modifier: Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Text(stringResource(R.string.catalog_empty), style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+private fun NoSearchResultsContent(modifier: Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text(stringResource(R.string.search_no_results), style = MaterialTheme.typography.bodyLarge)
     }
 }

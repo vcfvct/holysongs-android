@@ -63,8 +63,13 @@ class MainActivity : ComponentActivity() {
             HolySongsTheme(nightMode = preferences.nightMode) {
                 SongListScreen(
                     state = listViewModel.state.collectAsStateWithLifecycle().value,
+                    searchSession = listViewModel.searchSession.collectAsStateWithLifecycle().value,
                     preferences = preferences,
                     onSongSelected = ::navigateToLyric,
+                    onEnterSearch = listViewModel::enterSearch,
+                    onSearchQueryChanged = listViewModel::updateSearchQuery,
+                    onClearSearch = listViewModel::clearSearchQuery,
+                    onExitSearch = listViewModel::exitSearch,
                     onSettings = ::openSettings,
                     onAbout = ::openAbout,
                     onShareApp = ::openSharing,

@@ -97,6 +97,80 @@ class SongListViewModelTest {
     }
 
     @Test
+    fun searchSessionStartsInactiveAndRetainsRawQueryWithoutReloading() = runTest {
+        val main = StandardTestDispatcher(testScheduler)
+        val worker = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(main)
+        val stores = mutableListOf<ViewModelStore>()
+        try {
+            val opened = AtomicInteger()
+            val created = create(loader(worker, { validRows }, opened))
+            stores += created.owner.viewModelStore
+            advanceUntilIdle()
+            assertEquals(SearchSession(), created.model.searchSession.value)
+
+            created.model.enterSearch()
+            assertEquals(SearchSession(isActive = true), created.model.searchSession.value)
+            created.model.updateSearchQuery("  爱 A  ")
+            assertEquals(SearchSession(isActive = true, query = "  爱 A  "), created.model.searchSession.value)
+            advanceUntilIdle()
+            assertEquals(1, opened.get())
+        } finally {
+            stores.forEach(ViewModelStore::clear)
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun clearExitAndReopenMaintainSearchSessionInvariants() = runTest {
+        val main = StandardTestDispatcher(testScheduler)
+        val worker = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(main)
+        val stores = mutableListOf<ViewModelStore>()
+        try {
+            val created = create(loader(worker, { validRows }, AtomicInteger()))
+            stores += created.owner.viewModelStore
+            advanceUntilIdle()
+
+            created.model.enterSearch()
+            created.model.updateSearchQuery("爱")
+            created.model.clearSearchQuery()
+            assertEquals(SearchSession(isActive = true), created.model.searchSession.value)
+            created.model.clearSearchQuery()
+            assertEquals(SearchSession(isActive = true), created.model.searchSession.value)
+
+            created.model.exitSearch()
+            assertEquals(SearchSession(), created.model.searchSession.value)
+            created.model.exitSearch()
+            assertEquals(SearchSession(), created.model.searchSession.value)
+            created.model.enterSearch()
+            assertEquals(SearchSession(isActive = true), created.model.searchSession.value)
+        } finally {
+            stores.forEach(ViewModelStore::clear)
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun queryUpdatesAreIgnoredWhileSearchIsInactive() = runTest {
+        val main = StandardTestDispatcher(testScheduler)
+        val worker = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(main)
+        val stores = mutableListOf<ViewModelStore>()
+        try {
+            val created = create(loader(worker, { validRows }, AtomicInteger()))
+            stores += created.owner.viewModelStore
+            advanceUntilIdle()
+            created.model.updateSearchQuery("stale")
+            created.model.clearSearchQuery()
+            assertEquals(SearchSession(), created.model.searchSession.value)
+        } finally {
+            stores.forEach(ViewModelStore::clear)
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
     fun errorRetriesOnlyAfterExplicitRequest() = runTest {
         val main = StandardTestDispatcher(testScheduler)
         val worker = StandardTestDispatcher(testScheduler)

@@ -10,9 +10,10 @@ This repository contains a lightweight, offline-first Android app for browsing a
 ## Current status
 
 The Kotlin/Compose modernization phase is complete and owner-accepted. Main, lyric, Settings,
-and About now use Compose hosts, while the Java WebView/video integration and catalog helpers
-remain intentionally retained boundaries. The migration preserves the application identity,
-bundled catalog, legacy preferences, share payloads, and provider identities.
+and About use Compose hosts, and the video boundary remains a programmatic Android View/WebView.
+The current catalog migration keeps human-editable XML as the canonical source and generates the
+read-only SQLite asset consumed by the app. Application identity, legacy preferences, share
+payloads, provider identities, and all 414 effective lyrics remain preserved.
 
 The supported install floor is API 23: API 14–22 devices are no longer eligible to install/update
 this build. On 2026-09-16 the owner reported completing phone testing across the app and accepted
@@ -23,6 +24,24 @@ does not claim release signing or Play Store publication.
 
 Historical Feature 001 build evidence remains available in
 [`pr-checkpoint.md`](specs/001-modernize-build-system/evidence/pr-checkpoint.md); it describes the earlier build checkpoint and is not evidence of this Compose migration's runtime acceptance.
+
+## Song catalog architecture
+
+`app/src/main/assets/songs.xml` is the sole human-edited catalog. It contains 414 unique effective
+titles after the eight old shadowed duplicate entries were removed while retaining each prior
+last-entry winner. The historical 422-entry fixture remains under `app/src/test/resources/` and is
+used to prove exhaustive effective-content parity.
+
+The build runs `tools/catalog/generate_song_database.py` and writes the untracked generated asset
+`app/build/generated/songCatalog/assets/songs.db`. The app copies the packaged database to a
+short-lived private cache file, opens it read-only, loads all rows, closes it, and deletes the copy.
+It does not parse XML during normal startup and does not maintain a persistent user database.
+
+Maintain songs only through XML; never edit SQLite directly. See
+[`tools/catalog/README.md`](tools/catalog/README.md) for add/edit/rename/delete instructions and
+[`specs/003-song-database/quickstart.md`](specs/003-song-database/quickstart.md) for complete
+verification. Title and lyric are separate SQLite text columns, but search UI, FTS/tokenization,
+and ranking remain deferred to a later feature.
 
 ## Toolchain and compatibility
 
@@ -101,7 +120,7 @@ For a checkout with no `local.properties`, or with a correct ignored `sdk.dir`, 
 ```bash
 # Use the same portable environment setup shown above.
 ./gradlew --version
-./gradlew clean :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :app:assembleDebugAndroidTest --no-build-cache --rerun-tasks
+./gradlew clean :app:verifySongCatalog :app:assembleDebug :app:testDebugUnitTest :app:lintDebug :app:assembleDebugAndroidTest --no-build-cache --rerun-tasks
 ```
 
 Replay the app/test build offline without changing the lockfile:
@@ -119,7 +138,15 @@ If the local SDK is already installed and complete, this path can still work wit
 ```bash
 APK=app/build/outputs/apk/debug/app-debug.apk
 sha256sum "$APK" app/src/main/assets/songs.xml
-unzip -p "$APK" assets/songs.xml | sha256sum
+rm -f /tmp/holysongs-packaged.db
+unzip -p "$APK" assets/songs.db > /tmp/holysongs-packaged.db
+python3 tools/catalog/generate_song_database.py verify \
+  --source app/src/main/assets/songs.xml \
+  --schema tools/catalog/schema.sql \
+  --database /tmp/holysongs-packaged.db \
+  --baseline app/src/test/resources/catalog-baseline.xml \
+  --expected-count 414
+rm -f /tmp/holysongs-packaged.db
 "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK"
 "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs --min-sdk-version 23 "$APK"
 ```
@@ -129,7 +156,8 @@ Check the following:
 - package is `com.goodtrendltd.HolySongs`; version code/name remain `8` / `2.5`
 - minSdk is `23` and targetSdk is `37`
 - only `INTERNET`, `ACCESS_NETWORK_STATE`, and AndroidX's app-scoped protective dynamic-receiver permission are packaged
-- packaged `assets/songs.xml` hash matches the source `app/src/main/assets/songs.xml` hash
+- packaged `assets/songs.db` passes logical schema/metadata/all-414-row verification against canonical XML and the historical effective baseline
+- packaged `assets/songs.xml` may remain for source transparency, but production Kotlin does not open or parse it
 - Maven Central dependency `com.belerweb:pinyin4j:2.5.0` remains pinned in the dependency lockfile
 - v1 signature compatibility is present, not just v2/v3 signing output
 

@@ -1,0 +1,7 @@
+<songs>
+    <song><name>甲</name><lyric>第一行
+第二行　保留全宽空格</lyric></song>
+    <song><name>乙</name><lyric>Latin words 会移除 ASCII 空格</lyric></song>
+    <song><name>丙</name><lyric>新增
+歌词</lyric></song>
+</songs>

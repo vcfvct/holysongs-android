@@ -1,0 +1,5 @@
+<songs>
+    <song><name>甲</name><lyric>已编辑
+歌词　保持格式</lyric></song>
+    <song><name>乙</name><lyric>Latin words 会移除 ASCII 空格</lyric></song>
+</songs>

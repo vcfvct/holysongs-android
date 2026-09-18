@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goodtrendltd.HolySongs.data.BundledSongDatabase
 import com.goodtrendltd.HolySongs.data.ReaderPreferenceSnapshot
 import com.goodtrendltd.HolySongs.data.ReaderPreferences
 import com.goodtrendltd.HolySongs.data.SongCatalogLoader
@@ -26,7 +27,11 @@ class MainActivity : ComponentActivity() {
 
         /** Test-only construction seam; normal UI never changes this factory. */
         internal var catalogLoaderFactory: (Context) -> SongCatalogLoader = { context ->
-            SongCatalogLoader(openAsset = { context.assets.open("songs.xml") })
+            val database = BundledSongDatabase(
+                openAsset = { context.assets.open("songs.db") },
+                cacheDirectory = context.cacheDir,
+            )
+            SongCatalogLoader(readSongs = database::readSongs)
         }
     }
 

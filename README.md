@@ -199,6 +199,27 @@ sdkmanager "platform-tools" "platforms;android-37" "build-tools;36.0.0"
 
 If `sdkmanager` is not present, the local environment is still valid only if the required SDK components already exist. Missing command-line provisioning is a local setup blocker, not a product success claim.
 
+## Release optimization
+
+Release builds enable R8 code shrinking, optimization, obfuscation, and resource shrinking
+through AGP's `optimization` DSL. Debug builds remain unoptimized for development.
+
+```bash
+./gradlew :app:bundleRelease :app:assembleRelease :app:testDebugUnitTest :app:lintRelease :app:verifySongCatalog
+./gradlew :app:analyzeReleaseR8Config
+```
+
+Without a release signing configuration, the generated APK/AAB is unsigned and is not ready
+for installation or Play upload. Keep `app/build/outputs/mapping/release/mapping.txt` with
+its exact release artifact for crash retracing; the AAB also embeds this mapping for Play.
+JVM tests do not exercise optimized DEX. Before publication, smoke-test the optimized release
+on a dedicated test device: offline catalog loading, Chinese/pinyin search and letter navigation,
+lyrics, font/theme persistence, sharing, and video search/Back. Do not replace an installed
+production app with a differently signed test build.
+
+If optimization causes a runtime failure, add only evidence-backed, targeted keep rules under
+`app/src/release/keepRules/*.keep`; avoid blanket rules that defeat shrinking or obfuscation.
+
 ## Release signing and upgrade boundaries
 
 - This project does not generate or publish release keys

@@ -5,15 +5,16 @@ My Chinese hymns Android app. Check it out in Google play store :)
 
 ## Project background
 
-This repository contains a lightweight, offline-first Android app for browsing and reading Chinese hymn lyrics. The modernization work keeps the bundled song catalog, application identity, and preference semantics while replacing the legacy Ant/Eclipse build with a maintained Gradle-based workflow. The app module now uses the standard Android layout under `app/src/main/` for its manifest, Kotlin sources, resources, and assets.
+This repository contains a lightweight, offline-first Android app for browsing and reading Chinese hymn lyrics. The modernization work keeps the bundled song catalog and preference semantics while replacing the legacy Ant/Eclipse build with a maintained Gradle-based workflow. The current release uses a new application ID because the original production signing key was lost. The app module now uses the standard Android layout under `app/src/main/` for its manifest, Kotlin sources, resources, and assets.
 
 ## Current status
 
 The Kotlin/Compose modernization phase is complete and owner-accepted. Main, lyric, Settings,
 and About use Compose hosts, and the video boundary remains a programmatic Android View/WebView.
 The current catalog migration keeps human-editable XML as the canonical source and generates the
-read-only SQLite asset consumed by the app. Application identity, legacy preferences, share
-payloads, provider identities, and all 414 effective lyrics remain preserved.
+read-only SQLite asset consumed by the app. Legacy preference keys, share
+behavior, provider identities, and all 414 effective lyrics remain preserved. The new package
+installs separately from the original Play app and cannot update or automatically inherit its data.
 
 The supported install floor is API 23: API 14–22 devices are no longer eligible to install/update
 this build. On 2026-09-16 the owner reported completing phone testing across the app and accepted
@@ -52,7 +53,7 @@ and ranking remain deferred to a later feature.
 - Android SDK `platforms;android-37`, `build-tools;36.0.0`; minSdk 23, compile/target 37
 - AndroidX is enabled. Espresso 3.7.0 is pinned to avoid the API 37 InputManager mismatch.
 
-The launcher remains `com.goodtrendltd.HolySongs.MainActivity`; application identity and version remain `com.goodtrendltd.HolySongs`, versionCode 8 / versionName 2.5. The APK has the two legacy permissions (`INTERNET` and `ACCESS_NETWORK_STATE`) plus the AndroidX-generated app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` protective permission. The added app-private permission has `signature` protection; no new dangerous/runtime permission is introduced.
+The launcher class remains `com.goodtrendltd.HolySongs.MainActivity` (Kotlin namespace unchanged); the new installed application ID is `com.goodtrendpromos.hymns`, versionCode 10 / versionName 3.0. The APK has the two legacy permissions (`INTERNET` and `ACCESS_NETWORK_STATE`) plus the AndroidX-generated app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` protective permission. The added app-private permission has `signature` protection; no new dangerous/runtime permission is introduced.
 
 Android Studio may use its bundled JBR, but Gradle must use a local JDK 17. On Homebrew, `JAVA_HOME` points to the JDK root's `libexec` (for example `$(brew --prefix openjdk@17)/libexec`), not the formula directory itself. Keep discovery paths in the shell/user-local configuration, never in tracked `gradle.properties`; do not copy a daemon-JVM criteria file.
 
@@ -153,7 +154,7 @@ rm -f /tmp/holysongs-packaged.db
 
 Check the following:
 
-- package is `com.goodtrendltd.HolySongs`; version code/name remain `8` / `2.5`
+- package is `com.goodtrendpromos.hymns`; version code/name are `10` / `3.0`
 - minSdk is `23` and targetSdk is `37`
 - only `INTERNET`, `ACCESS_NETWORK_STATE`, and AndroidX's app-scoped protective dynamic-receiver permission are packaged
 - packaged `assets/songs.db` passes logical schema/metadata/all-414-row verification against canonical XML and the historical effective baseline
@@ -173,7 +174,7 @@ export ANDROID_SERIAL=your-test-device-serial
 adb devices -l
 adb -s "$ANDROID_SERIAL" shell getprop ro.build.version.sdk
 adb -s "$ANDROID_SERIAL" install -r app/build/outputs/apk/debug/app-debug.apk
-adb -s "$ANDROID_SERIAL" shell am start -n com.goodtrendltd.HolySongs/.MainActivity
+adb -s "$ANDROID_SERIAL" shell am start -n com.goodtrendpromos.hymns/com.goodtrendltd.HolySongs.MainActivity
 ```
 
 Inventory device state before installation, stop on signing conflicts, and keep a local catalog run offline when appropriate.

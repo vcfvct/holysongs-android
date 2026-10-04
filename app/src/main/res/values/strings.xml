@@ -36,7 +36,7 @@
     <string name="cancel_button">取消</string>
     <string name="loading_video">努力加载中…</string>
 
-    <string name="app_url_android">http://play.google.com/store/apps/details?id=com.goodtrendltd.HolySongs</string>
+    <string name="app_url_android">https://play.google.com/store/apps/details?id=com.goodtrendpromos.hymns</string>
     <string name="app_url_ios">https://itunes.apple.com/us/app/jing-bai-zan-mei-shi/id729679789?mt=8&amp;uo=4</string>
 
     <string-array name="font_size_array">

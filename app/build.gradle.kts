@@ -112,11 +112,11 @@ android {
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.goodtrendltd.HolySongs"
+        applicationId = "com.goodtrendpromos.hymns"
         minSdk = 23
         targetSdk = 37
-        versionCode = 8
-        versionName = "2.5"
+        versionCode = 10
+        versionName = "3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -153,7 +153,7 @@ class ReaderPreferencesTest {
     private fun withFixture(block: suspend CoroutineScope.(Fixture) -> Unit) = runBlocking {
         assumeTrue("Pass -e readerPreferencesMutate true on the disposable target",
             InstrumentationRegistry.getArguments().getString("readerPreferencesMutate") == "true")
-        assertEquals("com.goodtrendltd.HolySongs", app.packageName)
+        assertEquals("com.goodtrendpromos.hymns", app.packageName)
         assertEquals("appPrefFile", app.getString(R.string.app_pref))
         assertEquals(font, app.getString(R.string.font_size_pref_key))
         assertEquals(night, app.getString(R.string.night_mode_pref_key))

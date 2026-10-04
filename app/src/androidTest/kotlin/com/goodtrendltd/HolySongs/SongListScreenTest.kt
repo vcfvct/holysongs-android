@@ -79,7 +79,7 @@ class SongListScreenTest {
 
     @Before
     fun verifyIsolatedTarget() {
-        assertEquals("com.goodtrendltd.HolySongs", targetContext.packageName)
+        assertEquals("com.goodtrendpromos.hymns", targetContext.packageName)
     }
 
     @After

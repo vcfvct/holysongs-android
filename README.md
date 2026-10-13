@@ -53,7 +53,7 @@ and ranking remain deferred to a later feature.
 - Android SDK `platforms;android-37`, `build-tools;36.0.0`; minSdk 23, compile/target 37
 - AndroidX is enabled. Espresso 3.7.0 is pinned to avoid the API 37 InputManager mismatch.
 
-The launcher class remains `com.goodtrendltd.HolySongs.MainActivity` (Kotlin namespace unchanged); the new installed application ID is `com.goodtrendpromos.hymns`, versionCode 10 / versionName 3.0. The APK has the two legacy permissions (`INTERNET` and `ACCESS_NETWORK_STATE`) plus the AndroidX-generated app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` protective permission. The added app-private permission has `signature` protection; no new dangerous/runtime permission is introduced.
+The launcher class remains `com.goodtrendltd.HolySongs.MainActivity` (Kotlin namespace unchanged); the new installed application ID is `com.goodtrendpromos.hymns`, versionCode 11 / versionName 3.0.1. The APK has the two legacy permissions (`INTERNET` and `ACCESS_NETWORK_STATE`) plus the AndroidX-generated app-scoped `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` protective permission. The added app-private permission has `signature` protection; no new dangerous/runtime permission is introduced.
 
 Android Studio may use its bundled JBR, but Gradle must use a local JDK 17. On Homebrew, `JAVA_HOME` points to the JDK root's `libexec` (for example `$(brew --prefix openjdk@17)/libexec`), not the formula directory itself. Keep discovery paths in the shell/user-local configuration, never in tracked `gradle.properties`; do not copy a daemon-JVM criteria file.
 

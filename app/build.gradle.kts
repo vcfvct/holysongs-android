@@ -115,8 +115,8 @@ android {
         applicationId = "com.goodtrendpromos.hymns"
         minSdk = 23
         targetSdk = 37
-        versionCode = 10
-        versionName = "3.0"
+        versionCode = 11
+        versionName = "3.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
